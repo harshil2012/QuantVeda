@@ -8,7 +8,7 @@ import requests
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from backend.broker import get_stock_quote, check_is_market_open, get_candles
+from backend.broker import get_stock_quote, check_is_market_open, get_candles, get_max_candles
 from backend.ai_agent import analyze_sentiment
 from backend.db import init_db, seed_paper_wallet, get_db, SessionLocal
 from backend.models import PaperWallet, Watchlist
@@ -217,6 +217,22 @@ async def get_candles_endpoint(symbol: str, interval: str = "1d", range: str = "
     except Exception as e:
         logger.error(f"Failed to fetch candles for {clean_symbol}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="An error occurred while fetching candlestick history.")
+
+
+@app.get("/api/candles/{symbol}/max")
+async def get_max_candles_endpoint(symbol: str):
+    """Fetch maximum available daily candlestick history for a symbol."""
+    clean_symbol = symbol.strip().upper()
+    if not clean_symbol:
+        raise HTTPException(status_code=400, detail="Symbol parameter cannot be empty.")
+    try:
+        data = await get_max_candles(clean_symbol)
+        return {"status": "success", "data": data}
+    except ValueError as ve:
+        raise HTTPException(status_code=404, detail=str(ve))
+    except Exception as e:
+        logger.error(f"Failed to fetch max candles for {clean_symbol}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="An error occurred while fetching maximum history.")
 
 
 from pydantic import BaseModel, Field
