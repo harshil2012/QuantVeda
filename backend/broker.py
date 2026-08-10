@@ -2,6 +2,7 @@ import logging
 import asyncio
 import math
 import requests
+from requests.utils import quote
 from datetime import datetime, time
 import pytz
 
@@ -78,7 +79,7 @@ def fetch_symbol_news(symbol: str) -> list[dict]:
     for the requested stock symbol using Yahoo Finance news search API.
     """
     sym_clean = symbol.upper().strip()
-    url = f"https://query2.finance.yahoo.com/v1/finance/search?q={requests.utils.quote(sym_clean)}&newsCount=6&quotesCount=1"
+    url = f"https://query2.finance.yahoo.com/v1/finance/search?q={quote(sym_clean)}&newsCount=6&quotesCount=1"
     
     news_items = []
     try:
@@ -403,9 +404,9 @@ def fetch_candles_data(symbol: str, interval: str = "1d", range_str: str = "6mo"
     urls_to_try = []
     for s_test in symbols_to_test:
         urls_to_try.extend([
-            f"https://query1.finance.yahoo.com/v8/finance/chart/{requests.utils.quote(s_test)}?range={rng}&interval={inv}",
-            f"https://query1.finance.yahoo.com/v8/finance/chart/{requests.utils.quote(s_test)}?range={rng}&interval=1d",
-            f"https://query1.finance.yahoo.com/v8/finance/chart/{requests.utils.quote(s_test)}?range=max&interval=1d",
+            f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(s_test)}?range={rng}&interval={inv}",
+            f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(s_test)}?range={rng}&interval=1d",
+            f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(s_test)}?range=max&interval=1d",
         ])
     
     for url in urls_to_try:
@@ -483,14 +484,15 @@ def fetch_max_candles_data(symbol: str) -> dict:
     all_candles = []
     seen_timestamps = set()
     meta = None
+    meta_captured = False
     
     # Fetch in 1-year chunks going backward
     # Yahoo supports range=1y with interval=1d reliably
-    ranges_to_try = ["1y", "2y", "5y", "max"]
+    ranges_to_try = ["max", "5y", "2y", "1y"]
     
     for s_test in symbols_to_test:
         for rng in ranges_to_try:
-            url = f"https://query1.finance.yahoo.com/v8/finance/chart/{requests.utils.quote(s_test)}?range={rng}&interval=1d"
+            url = f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(s_test)}?range={rng}&interval=1d"
             try:
                 r = requests.get(url, headers=HEADERS, timeout=10)
                 if r.status_code == 200:
@@ -498,7 +500,9 @@ def fetch_max_candles_data(symbol: str) -> dict:
                     chart_res = data.get('chart', {}).get('result', [])
                     if chart_res:
                         res = chart_res[0]
-                        meta = res.get('meta', {})
+                        if not meta_captured:
+                            meta = res.get('meta', {})
+                            meta_captured = True
                         timestamps = res.get('timestamp', [])
                         indicators = res.get('indicators', {}).get('quote', [{}])[0]
                         
