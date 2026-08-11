@@ -2,8 +2,9 @@ import logging
 import asyncio
 import math
 import requests
+import time
 from requests.utils import quote
-from datetime import datetime, time
+from datetime import datetime, time as dt_time
 import pytz
 
 # Configure logger for broker module
@@ -52,8 +53,8 @@ def check_is_market_open(exchange: str, market_state: str = None) -> tuple[bool,
             now_ist = datetime.now(ist)
             weekday = now_ist.weekday()
             if weekday < 5:
-                start_time = time(9, 15)
-                end_time = time(15, 30)
+                start_time = dt_time(9, 15)
+                end_time = dt_time(15, 30)
                 current_time = now_ist.time()
                 if start_time <= current_time <= end_time:
                     return True, "MARKET OPEN"
@@ -63,8 +64,8 @@ def check_is_market_open(exchange: str, market_state: str = None) -> tuple[bool,
             est = pytz.timezone('US/Eastern')
             now_est = datetime.now(est)
             if now_est.weekday() < 5:
-                start_time = time(9, 30)
-                end_time = time(16, 0)
+                start_time = dt_time(9, 30)
+                end_time = dt_time(16, 0)
                 if start_time <= now_est.time() <= end_time:
                     return True, "MARKET OPEN"
             return False, "MARKET CLOSED"
@@ -468,11 +469,14 @@ def fetch_candles_data(symbol: str, interval: str = "1d", range_str: str = "6mo"
     raise ValueError(f"Could not retrieve candle history for '{sym_clean}' with interval='{inv}' and range='{rng}'.")
 
 
-def fetch_max_candles_data(symbol: str) -> dict:
+def fetch_max_candles_data(symbol: str, max_years_back: int = 20, _test_mode: bool = False) -> dict:
     """
-    Fetches maximum available daily candlestick history by stitching multiple
-    1-year range requests from Yahoo Finance v8 API.
+    Fetches maximum available daily candlestick history by fetching yearly chunks
+    using period1/period2 parameters (Yahoo Finance v8 API).
+    Avoids 'range=max' which returns monthly data for long histories.
     """
+    from datetime import datetime, timezone
+    
     sym_clean = symbol.strip().upper()
     
     # Try symbols with .NS/.BO suffixes
@@ -486,13 +490,20 @@ def fetch_max_candles_data(symbol: str) -> dict:
     meta = None
     meta_captured = False
     
-    # Fetch in 1-year chunks going backward
-    # Yahoo supports range=1y with interval=1d reliably
-    ranges_to_try = ["max", "5y", "2y", "1y"]
+    # Current time and 1 year in seconds
+    now = int(time.time())
+    one_year_sec = 365 * 24 * 60 * 60
+    
+    # Fetch yearly chunks going back up to max_years_back years (or until no data)
+    # Use period1/period2 for precise date ranges - returns daily data
     
     for s_test in symbols_to_test:
-        for rng in ranges_to_try:
-            url = f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(s_test)}?range={rng}&interval=1d"
+        for year_offset in range(max_years_back):
+            period2 = now - (year_offset * one_year_sec)
+            period1 = period2 - one_year_sec
+    
+            url = (f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(s_test)}"
+                   f"?period1={period1}&period2={period2}&interval=1d")
             try:
                 r = requests.get(url, headers=HEADERS, timeout=10)
                 if r.status_code == 200:
@@ -505,13 +516,13 @@ def fetch_max_candles_data(symbol: str) -> dict:
                             meta_captured = True
                         timestamps = res.get('timestamp', [])
                         indicators = res.get('indicators', {}).get('quote', [{}])[0]
-                        
+    
                         opens = indicators.get('open', [])
                         highs = indicators.get('high', [])
                         lows = indicators.get('low', [])
                         closes = indicators.get('close', [])
                         volumes = indicators.get('volume', [])
-                        
+    
                         chunk_candles = []
                         for i in range(len(timestamps)):
                             t = timestamps[i]
@@ -520,7 +531,7 @@ def fetch_max_candles_data(symbol: str) -> dict:
                             l = lows[i] if i < len(lows) else None
                             c = closes[i] if i < len(closes) else None
                             v = volumes[i] if i < len(volumes) else 0
-                            
+    
                             if t is not None and o is not None and h is not None and l is not None and c is not None:
                                 if not (math.isnan(o) or math.isnan(h) or math.isnan(l) or math.isnan(c)):
                                     # Deduplicate by timestamp
@@ -534,17 +545,79 @@ def fetch_max_candles_data(symbol: str) -> dict:
                                             "close": round(float(c), 2),
                                             "volume": int(v or 0)
                                         })
-                        
+    
                         if chunk_candles:
                             all_candles.extend(chunk_candles)
-                            # If we got substantial data, this symbol works
-                            if len(all_candles) > 50:
-                                break
+                        else:
+                            # No more data for this symbol, try next symbol
+                            break
             except Exception as e:
-                logger.warning(f"Max fetch chunk failed for {s_test} range={rng}: {e}")
-        
+                logger.warning(f"Max fetch chunk failed for {s_test} year_offset={year_offset}: {e}")
+    
         if len(all_candles) > 50:
             break
+    
+    # Fallback: if period1/period2 didn't work, try range-based (5y, 2y, 1y)
+    # Skip fallback in test mode (when max_years_back is explicitly set to non-default)
+    if len(all_candles) < 50 and not _test_mode:
+        all_candles = []
+        seen_timestamps = set()
+        meta = None
+        meta_captured = False
+        
+        for s_test in symbols_to_test:
+            for rng in ["5y", "2y", "1y"]:
+                url = f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(s_test)}?range={rng}&interval=1d"
+                try:
+                    r = requests.get(url, headers=HEADERS, timeout=10)
+                    if r.status_code == 200:
+                        data = r.json()
+                        chart_res = data.get('chart', {}).get('result', [])
+                        if chart_res:
+                            res = chart_res[0]
+                            if not meta_captured:
+                                meta = res.get('meta', {})
+                                meta_captured = True
+                            timestamps = res.get('timestamp', [])
+                            indicators = res.get('indicators', {}).get('quote', [{}])[0]
+                            
+                            opens = indicators.get('open', [])
+                            highs = indicators.get('high', [])
+                            lows = indicators.get('low', [])
+                            closes = indicators.get('close', [])
+                            volumes = indicators.get('volume', [])
+                            
+                            chunk_candles = []
+                            for i in range(len(timestamps)):
+                                t = timestamps[i]
+                                o = opens[i] if i < len(opens) else None
+                                h = highs[i] if i < len(highs) else None
+                                l = lows[i] if i < len(lows) else None
+                                c = closes[i] if i < len(closes) else None
+                                v = volumes[i] if i < len(volumes) else 0
+                                
+                                if t is not None and o is not None and h is not None and l is not None and c is not None:
+                                    if not (math.isnan(o) or math.isnan(h) or math.isnan(l) or math.isnan(c)):
+                                        if t not in seen_timestamps:
+                                            seen_timestamps.add(t)
+                                            chunk_candles.append({
+                                                "time": t,
+                                                "open": round(float(o), 2),
+                                                "high": round(float(h), 2),
+                                                "low": round(float(l), 2),
+                                                "close": round(float(c), 2),
+                                                "volume": int(v or 0)
+                                            })
+                            
+                            if chunk_candles:
+                                all_candles.extend(chunk_candles)
+                                if len(all_candles) > 50:
+                                    break
+                except Exception as e:
+                    logger.warning(f"Max fetch fallback failed for {s_test} range={rng}: {e}")
+            
+            if len(all_candles) > 50:
+                break
     
     if not all_candles:
         raise ValueError(f"Could not retrieve any candle history for '{sym_clean}'")
@@ -574,10 +647,12 @@ def fetch_max_candles_data(symbol: str) -> dict:
     }
 
 
-async def get_max_candles(symbol: str) -> dict:
+async def get_max_candles(symbol: str, max_years_back: int = 20) -> dict:
     """Asynchronously fetches max candlestick data off main thread."""
     loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(None, fetch_max_candles_data, symbol)
+    # Pass _test_mode=True when max_years_back is explicitly set (not default 20)
+    test_mode = max_years_back != 20
+    return await loop.run_in_executor(None, fetch_max_candles_data, symbol, max_years_back, test_mode)
 
 
 async def get_candles(symbol: str, interval: str = "1d", range_str: str = "6mo") -> dict:
