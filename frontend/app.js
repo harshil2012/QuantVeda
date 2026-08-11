@@ -932,16 +932,21 @@ async function loadCandlesData(symbol, interval = '1d', rangeStr = 'max') {
     });
   }
 
+  const isMaxRange = ['max', 'all'].includes(rangeStr.toLowerCase());
+  const apiEndpoint = isMaxRange
+    ? `${API_BASE_URL}/api/candles/${encodeURIComponent(symbol)}/max`
+    : `${API_BASE_URL}/api/candles/${encodeURIComponent(symbol)}?interval=${interval}&range=${rangeStr}`;
+
   try {
-    const res = await fetch(`${API_BASE_URL}/api/candles/${encodeURIComponent(symbol)}?interval=${interval}&range=${rangeStr}`);
+    const res = await fetch(apiEndpoint);
     const json = await res.json();
 
-    if (json.status === 'success' && json.data && json.data.length > 0) {
+    if (json.status === 'success' && json.data && json.data.candles && json.data.candles.length > 0) {
       const seenKeys = new Set();
       const candles = [];
       const volumes = [];
 
-      for (let c of json.data) {
+      for (let c of json.data.candles) {
         const formattedTime = formatCandleTime(c.time, isDaily);
         const key = isDaily ? `${formattedTime.year}-${formattedTime.month}-${formattedTime.day}` : formattedTime;
         if (!seenKeys.has(key)) {
@@ -961,21 +966,36 @@ async function loadCandlesData(symbol, interval = '1d', rangeStr = 'max') {
         }
       }
 
-      // Cache raw data for indicator recalculations
-      lastCandlesRaw = json.data;
+      lastCandlesRaw = json.data.candles;
 
       candlestickSeries.setData(candles);
       if (volumeSeries) volumeSeries.setData(volumes);
       if (tvChart) tvChart.timeScale().fitContent();
 
-      // Reapply active indicators
       applyIndicators();
+
+      updateDataProvenance(json.data.count, json.data.range || rangeStr);
     } else {
       generateMockCandles();
     }
   } catch (err) {
     console.warn('Candle fetch failed, rendering fallback chart:', err);
     generateMockCandles();
+  }
+}
+
+// NEW: Add data provenance display
+function updateDataProvenance(count, range) {
+  const existing = document.getElementById('chart-data-provenance');
+  if (existing) existing.remove();
+
+  const toolbar = document.getElementById('chart-range-selector');
+  if (toolbar) {
+    const badge = document.createElement('span');
+    badge.id = 'chart-data-provenance';
+    badge.className = 'ml-2 text-xs text-on-surface-variant bg-surface-container px-2 py-0.5 rounded font-data-mono';
+    badge.textContent = `${count} candles (${range})`;
+    toolbar.appendChild(badge);
   }
 }
 
