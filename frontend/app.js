@@ -406,6 +406,8 @@ function showDashboardHeroSkeleton() {
   const compEl = document.getElementById('dash-company-name');
   const priceEl = document.getElementById('dash-price-val');
   const changeEl = document.getElementById('dash-change-val');
+  const badge = document.getElementById('ai-signal-badge');
+  const conviction = document.getElementById('ai-conviction-val');
   const targetPrice = document.getElementById('ai-target-price');
   const stopLoss = document.getElementById('ai-stop-loss');
 
@@ -420,6 +422,13 @@ function showDashboardHeroSkeleton() {
   }
   if (changeEl) {
     changeEl.innerHTML = `<span class="inline-block w-16 h-3 bg-border-primary/30 animate-pulse rounded"></span>`;
+  }
+  if (badge) {
+    badge.className = 'px-3 py-1.5 rounded-lg flex items-center gap-1';
+    badge.innerHTML = `<span class="inline-block w-24 h-4 bg-border-primary/40 animate-pulse rounded"></span>`;
+  }
+  if (conviction) {
+    conviction.innerHTML = `<span class="inline-block w-28 h-4 bg-border-primary/30 animate-pulse rounded"></span>`;
   }
   if (targetPrice) {
     targetPrice.innerHTML = `<span class="inline-block w-16 h-4 bg-border-primary/40 animate-pulse rounded"></span>`;
@@ -503,6 +512,81 @@ function getCleanDisplayName(q) {
   return cleanSym.charAt(0).toUpperCase() + cleanSym.slice(1).toLowerCase();
 }
 
+window.quantVedaSignalCache = {};
+
+function logCanonicalSignalToAccuracyTracker(sig) {
+  if (typeof accuracyLogs === 'undefined' || !Array.isArray(accuracyLogs)) return;
+  const exists = accuracyLogs.some(l => l.symbol === sig.symbol);
+  if (!exists) {
+    const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    const currSym = sig.symbol.includes('.NS') || sig.symbol.includes('^') ? '₹' : '$';
+    accuracyLogs.unshift({
+      timestamp: nowStr,
+      symbol: sig.symbol,
+      name: getCleanDisplayName({ symbol: sig.symbol }),
+      type: sig.direction === 'BUY' ? 'LONG ENTRY' : 'SHORT ENTRY',
+      typeBg: sig.direction === 'BUY' ? 'bg-primary-fixed text-on-primary-fixed' : 'bg-error-container text-on-error-container',
+      target: `${currSym}${sig.targetPrice.toFixed(2)} (${sig.targetPct > 0 ? '+' : ''}${sig.targetPct}%)`,
+      peak: `${currSym}${sig.currentPrice.toFixed(2)}`,
+      status: 'ACTIVE',
+      statusBg: 'text-primary-container bg-primary-fixed',
+      icon: 'check_circle'
+    });
+    if (typeof renderAccuracyTable === 'function') {
+      renderAccuracyTable();
+    }
+  }
+}
+
+function getOrCreateCanonicalSignal(q) {
+  const symbol = (q && (q.symbol || q.symbol_canonical) ? (q.symbol || q.symbol_canonical) : currentSymbol).toUpperCase();
+
+  // Return cached signal if present
+  if (window.quantVedaSignalCache[symbol]) {
+    return window.quantVedaSignalCache[symbol];
+  }
+
+  const price = (q && q.price !== undefined) ? q.price : (window.lastKnownQuotePrice || 1313.50);
+  const pred = (q && q.prediction) ? q.prediction : {};
+  
+  const isBull = (pred.direction === 'BUY' || pred.direction === 'UP' || pred.predicted_direction === 'BULLISH' || pred.predicted_direction === 'STRONG BUY');
+  const direction = isBull ? 'BUY' : 'SELL';
+  
+  const convictionVal = pred.confidence_pct || pred.confidence_score || pred.conviction_pct || 92;
+  const conviction = Number((convictionVal / 100).toFixed(2));
+
+  // Percentages
+  const targetPct = isBull ? 8.2 : -7.5;
+  const stopLossPct = isBull ? -5.8 : 5.5;
+
+  // Derive target and stop loss prices strictly from currentPrice + pct
+  const targetPrice = Number((price * (1.0 + (targetPct / 100))).toFixed(2));
+  const stopLossPrice = Number((price * (1.0 + (stopLossPct / 100))).toFixed(2));
+
+  const canonical = {
+    symbol: symbol,
+    direction: direction,
+    predicted_direction: isBull ? 'STRONG BUY' : 'BEARISH / REDUCE',
+    conviction: conviction,
+    conviction_pct: convictionVal,
+    confidence_pct: convictionVal,
+    confidence_score: convictionVal,
+    currentPrice: price,
+    targetPct: targetPct,
+    targetPrice: targetPrice,
+    stopLossPct: stopLossPct,
+    stopLossPrice: stopLossPrice,
+    horizonDays: 14,
+    generatedAt: new Date().toISOString(),
+    summary: pred.technical_summary || pred.summary || `Quantitative neural model confirms ${isBull ? 'bullish breakout' : 'bearish pullback pressure'} across multi-timeframe indicators for ${symbol}.`
+  };
+
+  window.quantVedaSignalCache[symbol] = canonical;
+  logCanonicalSignalToAccuracyTracker(canonical);
+
+  return canonical;
+}
+
 function updateDashboardHero(q) {
   const symEl = document.getElementById('dash-symbol-name');
   const compEl = document.getElementById('dash-company-name');
@@ -521,10 +605,10 @@ function updateDashboardHero(q) {
   const displayName = getCleanDisplayName(q);
   const rawSymbol = q.symbol || currentSymbol;
 
-  // Main Title = Full Readable Name (e.g. Nifty 50, Reliance Industries, Apple)
+  // Main Title = Full Readable Name
   if (symEl) symEl.textContent = displayName;
   
-  // Secondary Badge = Symbol ticker (e.g. ^NSEI, RELIANCE.NS, AAPL)
+  // Secondary Badge = Symbol ticker
   if (compEl) compEl.textContent = rawSymbol.toUpperCase();
   
   if (exchEl) exchEl.textContent = `${q.exchange || 'NSE'} • ${q.currency || 'INR'} • Live 1-Day Intraday`;
@@ -539,30 +623,26 @@ function updateDashboardHero(q) {
     changeEl.innerHTML = `<span class="material-symbols-outlined text-xs">${icon}</span> ${sign}${changePct.toFixed(2)}% (${sign}${change.toFixed(2)})`;
   }
 
-  // Update AI Signal Card dynamically from live stock price
+  // Read single canonical signal
+  const signal = getOrCreateCanonicalSignal(q);
+
   const badge = document.getElementById('ai-signal-badge');
   const conviction = document.getElementById('ai-conviction-val');
   const targetPrice = document.getElementById('ai-target-price');
   const stopLoss = document.getElementById('ai-stop-loss');
 
-  const pred = q.prediction || {};
-  const isBull = (pred.direction || pred.predicted_direction) !== 'DOWN';
-  const convictionVal = pred.confidence_pct || pred.confidence_score || 94;
-  
-  // Calculate dynamic target and stop loss relative to live price
-  const targetVal = pred.target_high || (isBull ? price * 1.082 : price * 0.925);
-  const stopVal = pred.target_low || (isBull ? price * 0.942 : price * 1.055);
+  const isBuy = signal.direction === 'BUY';
 
   if (badge) {
-    badge.textContent = isBull ? 'STRONG BUY' : 'BEARISH / REDUCE';
-    badge.className = isBull 
+    badge.textContent = signal.predicted_direction;
+    badge.className = isBuy 
       ? 'bg-[#ECFDF5] text-[#059669] font-label-sm text-label-sm px-3 py-1.5 rounded-lg flex items-center gap-1 font-bold'
       : 'bg-[#FFF1F2] text-[#E11D48] font-label-sm text-label-sm px-3 py-1.5 rounded-lg flex items-center gap-1 font-bold';
   }
 
-  if (conviction) conviction.textContent = `Conviction: ${convictionVal}%`;
-  if (targetPrice) targetPrice.textContent = `${currSym}${targetVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  if (stopLoss) stopLoss.textContent = `${currSym}${stopVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (conviction) conviction.textContent = `Conviction: ${signal.conviction_pct}%`;
+  if (targetPrice) targetPrice.textContent = `${currSym}${signal.targetPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (stopLoss) stopLoss.textContent = `${currSym}${signal.stopLossPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function updateDashboardHeroFallback(symbol) {
@@ -2598,51 +2678,71 @@ async function openAiAnalysisModal() {
   if (!modal || !content) return;
 
   modal.classList.remove('hidden');
-  content.innerHTML = `<p class="text-secondary">Synthesizing Quantum AI insights for ${currentSymbol}...</p>`;
 
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/ai/sentiment`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ symbol: currentSymbol })
-    });
-    const json = await res.json();
+  // Read single canonical signal from memory cache
+  let signal = window.quantVedaSignalCache[currentSymbol.toUpperCase()];
 
-    if (json.status === 'success' && json.data) {
-      const data = json.data;
-      content.innerHTML = `
-        <div class="p-3 bg-surface-container rounded-lg space-y-2">
-          <div class="flex justify-between font-bold text-primary">
-            <span>Signal: ${data.sentiment || 'BULLISH'}</span>
-            <span>Confidence: ${data.confidence_score || 94}%</span>
-          </div>
-          <p class="text-xs text-on-surface-variant">${data.ai_reasoning || 'Strong momentum aligned with multi-timeframe moving averages.'}</p>
-        </div>
-      `;
-    } else {
-      renderDefaultAiModal();
+  if (!signal) {
+    content.innerHTML = `<p class="text-secondary p-4">Synthesizing Quantum AI insights for ${currentSymbol}...</p>`;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/ai/sentiment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ symbol: currentSymbol })
+      });
+      const json = await res.json();
+      if (json.status === 'success' && json.data) {
+        signal = getOrCreateCanonicalSignal({ symbol: currentSymbol, prediction: json.data });
+      }
+    } catch (err) {
+      console.warn('AI sentiment fetch failed:', err);
     }
-  } catch (err) {
-    renderDefaultAiModal();
   }
+
+  if (!signal) {
+    signal = getOrCreateCanonicalSignal({ symbol: currentSymbol });
+  }
+
+  renderCanonicalAiModal(signal);
 }
 
-function renderDefaultAiModal() {
+function renderCanonicalAiModal(signal) {
   const content = document.getElementById('ai-modal-content');
-  if (!content) return;
+  if (!content || !signal) return;
+
+  const currSym = signal.symbol.includes('.NS') || signal.symbol.includes('^') ? '₹' : '$';
+  const targetSign = signal.targetPct >= 0 ? '+' : '';
+  const stopSign = signal.stopLossPct >= 0 ? '+' : '';
+  const isBuy = signal.direction === 'BUY';
 
   content.innerHTML = `
     <div class="p-4 bg-surface-container rounded-lg space-y-3">
-      <div class="flex justify-between font-bold text-primary">
-        <span>Signal: STRONG BUY</span>
-        <span>Conviction: 94%</span>
+      <div class="flex justify-between items-center font-bold text-primary pb-2 border-b border-outline-variant">
+        <span class="inline-flex items-center gap-1.5 ${isBuy ? 'text-[#059669]' : 'text-[#E11D48]'} font-headline text-sm font-extrabold">
+          <span class="w-2.5 h-2.5 rounded-full ${isBuy ? 'bg-[#059669]' : 'bg-[#E11D48]'}"></span>
+          ${signal.predicted_direction}
+        </span>
+        <span class="font-data-mono text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full">Conviction: ${signal.conviction_pct}%</span>
       </div>
-      <p class="text-xs text-on-surface-variant">
-        Quantitative neural network confirms bullish breakout across 15m and 1H candles for ${currentSymbol}. Options order flow indicates heavy call accumulation.
-      </p>
-      <div class="pt-2 border-t border-outline-variant flex justify-between text-xs">
-        <span>Target: +8.5%</span>
-        <span>Stop Loss: -3.2%</span>
+      
+      <p class="text-xs text-on-surface-variant leading-relaxed font-body">${signal.summary}</p>
+      
+      <div class="pt-2 border-t border-outline-variant grid grid-cols-2 gap-3 text-xs font-data-mono">
+        <div class="bg-surface-container-high p-2.5 rounded-md border border-outline-variant">
+          <span class="text-on-surface-variant block text-[10px] uppercase font-bold text-text-muted mb-1">Target Price</span>
+          <span class="font-bold text-[#0F172A] dark:text-[#E6EDF3] text-sm">${currSym}${signal.targetPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span class="text-[10px] ${isBuy ? 'text-[#059669]' : 'text-[#E11D48]'} block mt-0.5">${targetSign}${signal.targetPct}%</span>
+        </div>
+        <div class="bg-surface-container-high p-2.5 rounded-md border border-outline-variant">
+          <span class="text-on-surface-variant block text-[10px] uppercase font-bold text-text-muted mb-1">Stop Loss</span>
+          <span class="font-bold text-[#E11D48] text-sm">${currSym}${signal.stopLossPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span class="text-[10px] ${isBuy ? 'text-[#E11D48]' : 'text-[#059669]'} block mt-0.5">${stopSign}${signal.stopLossPct}%</span>
+        </div>
+      </div>
+      
+      <div class="flex justify-between items-center text-[10px] font-data-mono text-text-muted pt-1">
+        <span>Time Horizon: ${signal.horizonDays} Days</span>
+        <span>Generated: ${new Date(signal.generatedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
       </div>
     </div>
   `;

@@ -1236,6 +1236,26 @@ def save_hits_to_watchlist(payload: SaveHitsToWatchlistPayload, db: Session = De
     db.commit()
     return {"status": "success", "message": f"Added {added_count} new symbols to watchlist '{wl.name}'."}
 
+class AISentimentPayload(BaseModel):
+    symbol: str
+
+@app.post("/api/ai/sentiment")
+async def get_ai_sentiment(payload: AISentimentPayload):
+    """Returns the single canonical AI signal object for a symbol."""
+    clean_symbol = payload.symbol.strip().upper()
+    if not clean_symbol:
+        raise HTTPException(status_code=400, detail="Symbol parameter cannot be empty.")
+    try:
+        quote_data = await get_stock_quote(clean_symbol)
+        prediction = quote_data.get("prediction", {})
+        return {
+            "status": "success",
+            "data": prediction
+        }
+    except Exception as e:
+        logger.error(f"Failed AI sentiment for {clean_symbol}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch AI sentiment.")
+
 import os
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
