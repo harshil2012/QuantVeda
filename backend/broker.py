@@ -241,18 +241,26 @@ def calculate_next_day_prediction(current_price: float, historical_closes: list[
         f"5-day momentum is {momentum_5d_pct:+.2f}% with expected target band [{cs}{range_min:,.2f} - {cs}{range_max:,.2f}]."
     )
 
+    target_high = round(current_price * 1.082, 2) if direction == "UP" else round(current_price * 0.925, 2)
+    target_low = round(current_price * 0.942, 2) if direction == "UP" else round(current_price * 1.055, 2)
+    conf = min(96, max(78, int(84 + abs(momentum_5d_pct)*0.6)))
+
     return {
         "predicted_open_price": predicted_open,
         "target_price": predicted_open,
         "direction": direction,
+        "predicted_direction": "BULLISH" if direction == "UP" else "BEARISH",
         "predicted_change_pct": round(pred_pct * 100, 2),
         "range_min": range_min,
         "range_max": range_max,
+        "target_high": target_high,
+        "target_low": target_low,
+        "confidence_pct": conf,
         "rsi": round(rsi, 1),
         "sma_20": round(sma_20, 2),
         "momentum_5d_pct": round(momentum_5d_pct, 2),
         "volatility_pct": round(volatility * 100, 2),
-        "confidence_score": min(95, max(60, int(75 + abs(momentum_5d_pct)*0.5))),
+        "confidence_score": conf,
         "technical_reasons": reasons_list,
         "technical_summary": summary
     }
@@ -343,8 +351,20 @@ def _fetch_yahoo_chart_data(symbol: str) -> dict:
                         price_change = round(price - float(prev_close), 2)
                         price_change_pct = round((price_change / float(prev_close)) * 100, 2) if prev_close else 0.0
 
+                        name = meta.get('shortName') or meta.get('longName') or symbol_canonical
+                        sym_u = symbol_canonical.upper()
+                        if sym_u in ["^NSEI", "%5ENSEI", "NSEI"]:
+                            name = "Nifty 50"
+                        elif sym_u in ["^NSEBANK", "%5ENSEBANK"]:
+                            name = "Nifty Bank"
+                        elif sym_u in ["^BSESN", "%5EBSESN"]:
+                            name = "S&P BSE Sensex"
+                        elif sym_u in ["^CNXIT", "%5ECNXIT"]:
+                            name = "Nifty IT"
+
                         return {
                             "symbol": symbol_canonical,
+                            "name": name,
                             "price": round(price, 2),
                             "previous_close": round(float(prev_close), 2),
                             "change": price_change,

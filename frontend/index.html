@@ -3,15 +3,60 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>QuantVeda AI - Live Trading Terminal</title>
+  <title>QuantVeda - Live Trading Terminal</title>
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   
-  <!-- Material Symbols Outlined -->
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <!-- Material Symbols Outlined (display=block prevents raw ligature text FOUC) -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+  
+  <style>
+    /* Prevent raw ligature icon names (e.g. 'dashboard', 'search') from flashing as plain text on page refresh */
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined', sans-serif;
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      font-feature-settings: 'liga';
+    }
+
+    /* Before font file finishes downloading over network, hide raw text ligatures and show a clean skeleton box */
+    html:not(.fonts-loaded) .material-symbols-outlined {
+      color: transparent !important;
+      background-color: rgba(148, 163, 184, 0.25);
+      border-radius: 4px;
+      user-select: none;
+    }
+  </style>
+
+  <script>
+    (function() {
+      if (document.fonts && document.fonts.load) {
+        document.fonts.load('1em "Material Symbols Outlined"').then(function() {
+          document.documentElement.classList.add('fonts-loaded');
+        }).catch(function() {
+          document.documentElement.classList.add('fonts-loaded');
+        });
+        setTimeout(function() {
+          document.documentElement.classList.add('fonts-loaded');
+        }, 400);
+      } else {
+        document.documentElement.classList.add('fonts-loaded');
+      }
+    })();
+  </script>
   
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -29,53 +74,275 @@
       theme: {
         extend: {
           "colors": {
-            "surface-container-high": "#e6e8ea",
-            "on-background": "#191c1e",
-            "primary-fixed": "#dae2fd",
-            "inverse-primary": "#bec6e0",
-            "on-primary": "#ffffff",
-            "surface-container-low": "#f2f4f6",
-            "on-tertiary": "#ffffff",
-            "on-error-container": "#93000a",
-            "outline": "#76777d",
-            "surface-variant": "#e0e3e5",
-            "primary-container": "#131b2e",
-            "tertiary-container": "#271901",
-            "on-secondary-fixed": "#0d1c2f",
-            "outline-variant": "#c6c6cd",
-            "secondary-fixed": "#d5e3fd",
-            "surface-dim": "#d8dadc",
-            "on-secondary": "#ffffff",
-            "error-container": "#ffdad6",
-            "surface-container-lowest": "#ffffff",
-            "primary": "#000000",
-            "on-tertiary-container": "#98805d",
-            "surface-container-highest": "#e0e3e5",
-            "inverse-on-surface": "#eff1f3",
-            "on-tertiary-fixed": "#271901",
-            "secondary-container": "#d5e3fd",
-            "on-primary-fixed": "#131b2e",
-            "on-surface-variant": "#45464d",
-            "on-secondary-container": "#57657b",
-            "surface-bright": "#f7f9fb",
-            "secondary": "#515f74",
-            "secondary-fixed-dim": "#b9c7e0",
-            "surface-container": "#eceef0",
-            "on-error": "#ffffff",
-            "inverse-surface": "#2d3133",
-            "error": "#ba1a1a",
-            "on-surface": "#191c1e",
-            "surface": "#f7f9fb",
-            "primary-fixed-dim": "#bec6e0",
-            "on-secondary-fixed-variant": "#3a485c",
-            "surface-tint": "#565e74",
-            "tertiary-fixed-dim": "#dec29a",
-            "on-primary-container": "#7c839b",
-            "on-tertiary-fixed-variant": "#574425",
-            "on-primary-fixed-variant": "#3f465c",
-            "tertiary": "#000000",
-            "background": "#f7f9fb",
-            "tertiary-fixed": "#fcdeb5"
+            /* ===== QUANT VEDA DARK THEME (TradingView-inspired) ===== */
+            "dark-bg-primary": "#090d16",
+            "dark-bg-secondary": "#0d1117",
+            "dark-bg-tertiary": "#161b22",
+            "dark-bg-hover": "#1f2428",
+            "dark-bg-active": "#2d333b",
+            
+            "dark-border-primary": "#21262d",
+            "dark-border-secondary": "#30363d",
+            "dark-border-accent": "#388bfd",
+            
+            "dark-text-primary": "#e6edf3",
+            "dark-text-secondary": "#8b949e",
+            "dark-text-muted": "#6e7681",
+            
+            "dark-accent-blue": "#388bfd",
+            "dark-accent-cyan": "#39c5cf",
+            "dark-accent-green": "#3fb950",
+            "dark-accent-red": "#f85149",
+            "dark-accent-yellow": "#d29922",
+            "dark-accent-purple": "#a371f7",
+            
+            "dark-bullish": "#3fb950",
+            "dark-bearish": "#f85149",
+            
+            "dark-chart-bg": "#0d1117",
+            "dark-chart-grid": "#21262d",
+            "dark-chart-crosshair": "#30363d",
+            
+            "dark-volume-bullish": "#3fb95080",
+            "dark-volume-bearish": "#f8514980",
+            
+            "dark-overlay-bg": "#161b22ee",
+            "dark-overlay-border": "#30363d",
+            
+            "dark-scrollbar-track": "#0d1117",
+            "dark-scrollbar-thumb": "#30363d",
+            "dark-scrollbar-thumb-hover": "#484f58",
+            
+            "dark-sidebar-bg": "#0d1117",
+            "dark-sidebar-border": "#21262d",
+            "dark-sidebar-hover": "#161b22",
+            
+            "dark-toolbar-bg": "#161b22",
+            "dark-toolbar-border": "#21262d",
+            "dark-toolbar-btn-hover": "#21262d",
+            "dark-toolbar-btn-active": "#388bfd20",
+            
+            "dark-modal-bg": "#161b22",
+            "dark-modal-border": "#30363d",
+            
+            "dark-input-bg": "#0d1117",
+            "dark-input-border": "#30363d",
+            "dark-input-focus": "#388bfd",
+            
+            "dark-dropdown-bg": "#161b22",
+            "dark-dropdown-border": "#30363d",
+            "dark-dropdown-hover": "#21262d",
+            
+            "dark-candle-bullish": "#3fb950",
+            "dark-candle-bearish": "#f85149",
+            "dark-candle-border-bullish": "#3fb950",
+            "dark-candle-border-bearish": "#f85149",
+            "dark-wick-bullish": "#3fb950",
+            "dark-wick-bearish": "#f85149",
+            
+            "dark-indicator-ema": "#388bfd",
+            "dark-indicator-sma": "#f85149",
+            "dark-indicator-rsi": "#a371f7",
+            "dark-indicator-macd": "#39c5cf",
+            "dark-indicator-bb": "#d29922",
+            "dark-indicator-vwap": "#8b949e",
+            
+            /* ===== QUANT VEDA LIGHT THEME (Original) ===== */
+            "light-surface-container-high": "#e6e8ea",
+            "light-on-background": "#191c1e",
+            "light-primary-fixed": "#dae2fd",
+            "light-inverse-primary": "#bec6e0",
+            "light-on-primary": "#ffffff",
+            "light-surface-container-low": "#f2f4f6",
+            "light-on-tertiary": "#ffffff",
+            "light-on-error-container": "#93000a",
+            "light-outline": "#76777d",
+            "light-surface-variant": "#e0e3e5",
+            "light-primary-container": "#131b2e",
+            "light-tertiary-container": "#271901",
+            "light-on-secondary-fixed": "#0d1c2f",
+            "light-outline-variant": "#c6c6cd",
+            "light-secondary-fixed": "#d5e3fd",
+            "light-surface-dim": "#d8dadc",
+            "light-on-secondary": "#ffffff",
+            "light-error-container": "#ffdad6",
+            "light-surface-container-lowest": "#ffffff",
+            "light-primary": "#000000",
+            "light-on-tertiary-container": "#98805d",
+            "light-surface-container-highest": "#e0e3e5",
+            "light-inverse-on-surface": "#eff1f3",
+            "light-on-tertiary-fixed": "#271901",
+            "light-secondary-container": "#d5e3fd",
+            "light-on-primary-fixed": "#131b2e",
+            "light-on-surface-variant": "#45464d",
+            "light-on-secondary-container": "#57657b",
+            "light-surface-bright": "#f7f9fb",
+            "light-secondary": "#515f74",
+            "light-secondary-fixed-dim": "#b9c7e0",
+            "light-surface-container": "#eceef0",
+            "light-on-error": "#ffffff",
+            "light-inverse-surface": "#2d3133",
+            "light-error": "#ba1a1a",
+            "light-on-surface": "#191c1e",
+            "light-surface": "#f7f9fb",
+            "light-primary-fixed-dim": "#bec6e0",
+            "light-on-secondary-fixed-variant": "#3a485c",
+            "light-surface-tint": "#565e74",
+            "light-tertiary-fixed-dim": "#dec29a",
+            "light-on-primary-container": "#7c839b",
+            "light-on-tertiary-fixed-variant": "#574425",
+            "light-on-primary-fixed-variant": "#3f465c",
+            "light-tertiary": "#000000",
+            "light-background": "#f7f9fb",
+            "light-tertiary-fixed": "#fcdeb5",
+            
+            /* ===== SEMANTIC ALIASES (auto-switch based on theme) ===== */
+            "bg-primary": "#f7f9fb",
+            "bg-secondary": "#ffffff",
+            "bg-tertiary": "#f2f4f6",
+            "bg-hover": "#e6e8ea",
+            "bg-active": "#d8dadc",
+            
+            "border-primary": "#e0e3e5",
+            "border-secondary": "#c6c6cd",
+            "border-accent": "#000000",
+            
+            "text-primary": "#191c1e",
+            "text-secondary": "#45464d",
+            "text-muted": "#76777d",
+            
+            "accent-blue": "#2563eb",
+            "accent-cyan": "#007b83",
+            "accent-green": "#059669",
+            "accent-red": "#e11d48",
+            "accent-yellow": "#b45309",
+            "accent-purple": "#7c3aed",
+            
+            "bullish": "#059669",
+            "bearish": "#e11d48",
+            
+            "chart-bg": "#ffffff",
+            "chart-grid": "#e0e3e5",
+            "chart-crosshair": "#c6c6cd",
+            
+            "volume-bullish": "#05966980",
+            "volume-bearish": "#e11d4880",
+            
+            "overlay-bg": "#ffffffee",
+            "overlay-border": "#e0e3e5",
+            
+            "scrollbar-track": "#f2f4f6",
+            "scrollbar-thumb": "#c6c6cd",
+            "scrollbar-thumb-hover": "#76777d",
+            
+            "sidebar-bg": "#f7f9fb",
+            "sidebar-border": "#e0e3e5",
+            "sidebar-hover": "#eceef0",
+            
+            "toolbar-bg": "#ffffff",
+            "toolbar-border": "#e0e3e5",
+            "toolbar-btn-hover": "#f2f4f6",
+            "toolbar-btn-active": "#2563eb",
+            
+            "modal-bg": "#ffffff",
+            "modal-border": "#e0e3e5",
+            
+            "input-bg": "#ffffff",
+            "input-border": "#c6c6cd",
+            "input-focus": "#000000",
+            
+            "dropdown-bg": "#ffffff",
+            "dropdown-border": "#e0e3e5",
+            "dropdown-hover": "#f2f4f6",
+            
+            "candle-bullish": "#059669",
+            "candle-bearish": "#e11d48",
+            "candle-border-bullish": "#059669",
+            "candle-border-bearish": "#e11d48",
+            "wick-bullish": "#059669",
+            "wick-bearish": "#e11d48",
+            
+            "indicator-ema": "#000000",
+            "indicator-sma": "#e11d48",
+            "indicator-rsi": "#7c3aed",
+            "indicator-macd": "#007b83",
+            "indicator-bb": "#b45309",
+            "indicator-vwap": "#45464d",
+            
+            /* ===== DARK THEME OVERRIDES (applied when .dark class present) ===== */
+            "dark": {
+              "bg-primary": "#090d16",
+              "bg-secondary": "#0d1117",
+              "bg-tertiary": "#161b22",
+              "bg-hover": "#1f2428",
+              "bg-active": "#2d333b",
+              
+              "border-primary": "#21262d",
+              "border-secondary": "#30363d",
+              "border-accent": "#388bfd",
+              
+              "text-primary": "#e6edf3",
+              "text-secondary": "#8b949e",
+              "text-muted": "#6e7681",
+              
+              "accent-blue": "#388bfd",
+              "accent-cyan": "#39c5cf",
+              "accent-green": "#3fb950",
+              "accent-red": "#f85149",
+              "accent-yellow": "#d29922",
+              "accent-purple": "#a371f7",
+              
+              "bullish": "#3fb950",
+              "bearish": "#f85149",
+              
+              "chart-bg": "#0d1117",
+              "chart-grid": "#21262d",
+              "chart-crosshair": "#30363d",
+              
+              "volume-bullish": "#3fb95080",
+              "volume-bearish": "#f8514980",
+              
+              "overlay-bg": "#161b22ee",
+              "overlay-border": "#30363d",
+              
+              "scrollbar-track": "#0d1117",
+              "scrollbar-thumb": "#30363d",
+              "scrollbar-thumb-hover": "#484f58",
+              
+              "sidebar-bg": "#0d1117",
+              "sidebar-border": "#21262d",
+              "sidebar-hover": "#161b22",
+              
+              "toolbar-bg": "#161b22",
+              "toolbar-border": "#21262d",
+              "toolbar-btn-hover": "#21262d",
+              "toolbar-btn-active": "#388bfd",
+              
+              "modal-bg": "#161b22",
+              "modal-border": "#30363d",
+              
+              "input-bg": "#0d1117",
+              "input-border": "#30363d",
+              "input-focus": "#388bfd",
+              
+              "dropdown-bg": "#161b22",
+              "dropdown-border": "#30363d",
+              "dropdown-hover": "#21262d",
+              
+              "candle-bullish": "#3fb950",
+              "candle-bearish": "#f85149",
+              "candle-border-bullish": "#3fb950",
+              "candle-border-bearish": "#f85149",
+              "wick-bullish": "#3fb950",
+              "wick-bearish": "#f85149",
+              
+              "indicator-ema": "#388bfd",
+              "indicator-sma": "#f85149",
+              "indicator-rsi": "#a371f7",
+              "indicator-macd": "#39c5cf",
+              "indicator-bb": "#d29922",
+              "indicator-vwap": "#8b949e",
+            }
           },
           "borderRadius": {
             "DEFAULT": "0.25rem",
@@ -96,26 +363,46 @@
             "stack-md": "1.5rem"
           },
           "fontFamily": {
-            "headline-lg": ["Plus Jakarta Sans"],
-            "headline-lg-mobile": ["Plus Jakarta Sans"],
-            "headline-md": ["Plus Jakarta Sans"],
-            "body-md": ["Plus Jakarta Sans"],
-            "body-lg": ["Plus Jakarta Sans"],
-            "label-sm": ["Plus Jakarta Sans"],
-            "label-caps": ["Plus Jakarta Sans"],
-            "display-lg": ["Plus Jakarta Sans"],
-            "data-mono": ["JetBrains Mono"]
+            "sans": ["Plus Jakarta Sans", "Inter", "system-ui", "sans-serif"],
+            "mono": ["JetBrains Mono", "Monaco", "Consolas", "monospace"],
+            "headline": ["Plus Jakarta Sans", "Inter", "system-ui", "sans-serif"],
+            "body": ["Plus Jakarta Sans", "Inter", "system-ui", "sans-serif"],
+            "label": ["Plus Jakarta Sans", "Inter", "system-ui", "sans-serif"],
+            "data": ["JetBrains Mono", "Monaco", "Consolas", "monospace"],
           },
           "fontSize": {
-            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
-            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
-            "headline-md": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
-            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
-            "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
-            "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
-            "label-caps": ["10px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700", "textTransform": "uppercase" }],
-            "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
-            "data-mono": ["14px", { "lineHeight": "20px", "fontWeight": "500" }]
+            "xs": ["0.7rem", { "lineHeight": "1rem", "fontWeight": "500" }],
+            "sm": ["0.75rem", { "lineHeight": "1rem", "fontWeight": "500" }],
+            "base": ["0.8125rem", { "lineHeight": "1.25rem", "fontWeight": "400" }],
+            "lg": ["0.875rem", { "lineHeight": "1.25rem", "fontWeight": "400" }],
+            "xl": ["1rem", { "lineHeight": "1.5rem", "fontWeight": "400" }],
+            "2xl": ["1.125rem", { "lineHeight": "1.75rem", "fontWeight": "600" }],
+            "3xl": ["1.25rem", { "lineHeight": "1.75rem", "fontWeight": "700" }],
+            "4xl": ["1.5rem", { "lineHeight": "2rem", "fontWeight": "700" }],
+            "data-xs": ["0.625rem", { "lineHeight": "0.875rem", "fontWeight": "500" }],
+            "data-sm": ["0.7rem", { "lineHeight": "1rem", "fontWeight": "500" }],
+            "data-base": ["0.75rem", { "lineHeight": "1.125rem", "fontWeight": "500" }],
+            "data-lg": ["0.875rem", { "lineHeight": "1.25rem", "fontWeight": "500" }],
+          },
+          "transitionDuration": {
+            "fast": "100ms",
+            "normal": "150ms",
+            "slow": "200ms",
+          },
+          "boxShadow": {
+            "chart": "0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3)",
+            "modal": "0 8px 32px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4)",
+            "dropdown": "0 8px 24px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.3)",
+            "toolbar": "0 2px 8px rgba(0, 0, 0, 0.3)",
+            "panel": "0 4px 16px rgba(0, 0, 0, 0.4)",
+          },
+          "zIndex": {
+            "dropdown": "100",
+            "modal": "200",
+            "tooltip": "300",
+            "toolbar": "50",
+            "sidebar": "40",
+            "header": "30",
           }
         }
       }
@@ -126,88 +413,770 @@
     .material-symbols-outlined {
       font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
-    .chart-grid {
-      background-image: linear-gradient(to right, #e0e3e5 1px, transparent 1px),
-                        linear-gradient(to bottom, #e0e3e5 1px, transparent 1px);
-      background-size: 40px 40px;
+    
+    /* TradingView-like Dark Theme Base */
+    * {
+      box-sizing: border-box;
     }
-    .data-table-row { height: 48px; border-bottom: 1px solid #E2E8F0; }
-    .data-table-row:last-child { border-bottom: none; }
-    .data-table-row:hover { background-color: #F1F5F9; }
-    .glass-card { background: #FFFFFF; border: 1px solid #E2E8F0; box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.05); }
-    .signal-positive { background-color: #ECFDF5; color: #059669; }
-    .signal-negative { background-color: #FFF1F2; color: #E11D48; }
-
+    
+    html {
+      font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+    }
+    
+    body {
+      background-color: #090d16;
+      color: #e6edf3;
+    }
+    
     /* Custom scrollbars */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #f2f4f6; }
-    ::-webkit-scrollbar-thumb { background: #c6c6cd; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #76777d; }
-
-    .nav-item-active {
-      border-left-width: 2px;
-      border-color: #000000;
-      background-color: rgba(0, 0, 0, 0.08);
-      color: #000000 !important;
-      font-weight: 700;
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0d1117; }
+    ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; border: 2px solid #0d1117; }
+    ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+    ::-webkit-scrollbar-corner { background: #0d1117; }
+    
+    /* Firefox scrollbar */
+    * { scrollbar-width: thin; scrollbar-color: #30363d #0d1117; }
+    
+    /* Chart container */
+    .chart-container {
+      background-color: #0d1117;
     }
+    
+    /* Toolbar styles */
+    /* Toolbar button — single source of truth */
+    .toolbar-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: #8b949e;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: all 150ms ease;
+      min-width: 40px;
+      text-align: center;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    
+    .toolbar-btn:hover:not(.active) {
+      color: #e6edf3;
+      background: #21262d;
+    }
+    
+    .toolbar-btn.active {
+      color: #ffffff !important;
+      background: #4f46e5 !important;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.4);
+      border-radius: 6px;
+    }
+    
+    /* Light theme active override */
+    :not(.dark) .toolbar-btn {
+      color: #64748b;
+    }
+    :not(.dark) .toolbar-btn:hover:not(.active) {
+      color: #0f172a;
+      background: #f1f5f9;
+    }
+    :not(.dark) .toolbar-btn.active {
+      color: #ffffff !important;
+      background: #4f46e5 !important;
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
+    }
+    
+    .toolbar-divider {
+      @apply h-6 w-px bg-border-primary mx-2;
+    }
+    
+    /* Chart grid overlay */
+    .chart-grid-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image: 
+        linear-gradient(to right, #21262d 1px, transparent 1px),
+        linear-gradient(to bottom, #21262d 1px, transparent 1px);
+      background-size: 80px 80px;
+      z-index: 1;
+    }
+    
+    /* Crosshair styles */
+    .crosshair-line {
+      @apply absolute bg-chart-crosshair pointer-events-none;
+    }
+    
+    .crosshair-h { height: 1px; left: 0; right: 0; }
+    .crosshair-v { width: 1px; top: 0; bottom: 0; }
+    
+    /* Tooltip / Crosshair label */
+    .crosshair-tooltip {
+      @apply absolute pointer-events-none z-20 px-2 py-1 rounded text-data-xs font-mono bg-overlay-bg border border-overlay-border shadow-modal;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      white-space: nowrap;
+      transform: translateX(-50%);
+    }
+    
+    .crosshair-tooltip.y-axis {
+      transform: translateY(-50%);
+      left: auto;
+      right: 0;
+    }
+    
+    /* Modal/Dialog */
+    .modal-overlay {
+      @apply fixed inset-0 bg-black/60 backdrop-blur-sm z-[200];
+    }
+    
+    .modal-panel {
+      @apply fixed bg-modal-bg border border-modal-border rounded-xl shadow-modal z-[201] max-h-[90vh] flex flex-col;
+    }
+    
+    .modal-header {
+      @apply flex items-center justify-between px-4 py-3 border-b border-modal-border;
+    }
+    
+    .modal-body {
+      @apply flex-1 overflow-auto p-4;
+    }
+    
+    .modal-footer {
+      @apply flex items-center justify-end gap-2 px-4 py-3 border-t border-modal-border;
+    }
+    
+    /* Dropdown */
+    .dropdown-panel {
+      @apply absolute bg-dropdown-bg border border-dropdown-border rounded-lg shadow-dropdown z-[100] min-w-[200px] py-1;
+    }
+    
+    .dropdown-item {
+      @apply flex items-center gap-2 px-3 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-dropdown-hover rounded-none transition-colors duration-fast cursor-pointer;
+    }
+    
+    .dropdown-divider {
+      @apply h-px bg-border-primary mx-1 my-1;
+    }
+    
+    /* Input styles */
+    .input-field {
+      @apply w-full px-3 py-2 bg-input-bg border border-input-border rounded-lg text-text-primary placeholder:text-muted 
+             focus:outline-none focus:ring-2 focus:ring-input-focus focus:border-input-focus transition-all duration-fast;
+    }
+    
+    .input-field-sm {
+      @apply px-2.5 py-1.5 text-sm;
+    }
+    
+    /* Button variants */
+    .btn-primary {
+      @apply px-4 py-2 bg-accent-blue text-white rounded-lg font-medium hover:bg-accent-blue/90 
+             focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-all duration-fast;
+    }
+    
+    .btn-secondary {
+      @apply px-4 py-2 bg-bg-hover text-text-primary border border-border-primary rounded-lg font-medium 
+             hover:bg-bg-active hover:border-border-secondary focus:outline-none focus:ring-2 focus:ring-accent-blue/50 
+             transition-all duration-fast;
+    }
+    
+    .btn-ghost {
+      @apply px-3 py-1.5 text-text-secondary hover:text-text-primary hover:bg-toolbar-btn-hover 
+             rounded-lg transition-all duration-fast;
+    }
+    
+    .btn-icon {
+      @apply p-2 text-text-secondary hover:text-text-primary hover:bg-toolbar-btn-hover 
+             rounded-lg transition-all duration-fast;
+    }
+    
+    /* Symbol search dropdown */
+    .symbol-search-item {
+      @apply flex items-center justify-between px-3 py-2.5 hover:bg-dropdown-hover cursor-pointer transition-colors duration-fast;
+    }
+    
+    .symbol-search-item .symbol-info {
+      @apply flex items-center gap-2;
+    }
+    
+    .symbol-search-item .symbol {
+      @apply font-mono font-bold text-text-primary text-sm;
+    }
+    
+    .symbol-search-item .name {
+      @apply text-text-secondary text-xs truncate max-w-[150px];
+    }
+    
+    .symbol-search-item .exchange {
+      @apply text-xs font-mono text-text-secondary bg-bg-hover px-2 py-0.5 rounded;
+    }
+    
+    /* Indicator list item */
+    .indicator-item {
+      @apply flex items-center justify-between px-3 py-2 hover:bg-dropdown-hover rounded-lg transition-colors cursor-pointer;
+    }
+    
+    .indicator-item .indicator-name {
+      @apply font-medium text-text-primary;
+    }
+    
+    .indicator-item .indicator-category {
+      @apply text-xs text-text-muted;
+    }
+    
+    /* Category section */
+    .category-section {
+      @apply px-3 py-2;
+    }
+    
+    .category-title {
+      @apply text-xs font-semibold text-text-muted uppercase tracking-wider;
+    }
+    
+    /* Applied indicators bar */
+    .applied-indicators-bar {
+      @apply flex items-center gap-2 px-3 py-2 border-b border-border-primary bg-bg-secondary;
+    }
+    
+    .applied-indicator-tag {
+      @apply flex items-center gap-1.5 px-2.5 py-1 bg-bg-hover border border-border-primary rounded text-sm font-mono text-text-secondary;
+    }
+    
+    .applied-indicator-tag .remove-btn {
+      @apply p-0.5 hover:bg-red-500/20 hover:text-accent-red rounded transition-colors;
+    }
+    
+    /* Price display */
+    .price-display {
+      @apply font-mono font-bold text-2xl sm:text-3xl;
+    }
+    
+    .price-change {
+      @apply font-mono text-base flex items-center gap-1;
+    }
+    
+    .price-change.positive { @apply text-bullish; }
+    .price-change.negative { @apply text-bearish; }
+    
+    /* Volume profile */
+    .volume-bar {
+      @apply transition-opacity duration-fast;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-8px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    @keyframes pulse-soft {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    
+    .animate-fade-in { animation: fadeIn 150ms ease-out; }
+    .animate-slide-in { animation: slideIn 150ms ease-out; }
+    .animate-pulse-soft { animation: pulse-soft 2s ease-in-out infinite; }
+    
+    /* Focus visible */
+    *:focus-visible {
+      @apply outline-none ring-2 ring-accent-blue/50 ring-offset-2 ring-offset-bg-primary;
+    }
+    
+    /* Selection */
+    ::selection {
+      @apply bg-accent-blue/30 text-text-primary;
+    }
+    
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== VISUAL POLISH IMPROVEMENTS ===== */
+
+
+
+.toolbar-divider {
+  @apply h-7 w-px bg-border-primary/50 mx-1;
+}
+
+/* Symbol selector dropdown */
+#chart-symbol-dropdown-btn {
+  @apply px-3 py-1.5 rounded-lg transition-colors duration-150;
+}
+
+#chart-symbol-dropdown-btn:hover {
+  @apply bg-toolbar-btn-hover;
+}
+
+#chart-symbol-dropdown-btn .material-symbols-outlined {
+  @apply transition-transform duration-200;
+}
+
+/* Drawing tools toolbar */
+.drawing-tool-btn {
+  @apply p-2 rounded-lg transition-all duration-150 text-text-muted hover:text-text-primary hover:bg-sidebar-hover;
+}
+
+.drawing-tool-btn.active {
+  @apply text-accent-blue bg-accent-blue/15;
+}
+
+#drawing-tools {
+  @apply w-12 border-r border-border-primary/50 bg-sidebar-bg/80 backdrop-blur-sm;
+}
+
+/* Sidebar Collapse System */
+#desktop-sidenav {
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+#desktop-sidenav.sidebar-collapsed {
+  width: 4.25rem !important; /* ~68px icon bar */
+}
+
+#desktop-sidenav.sidebar-collapsed .sidebar-text-label,
+#desktop-sidenav.sidebar-collapsed .nav-btn span:not(.material-symbols-outlined) {
+  display: none !important;
+}
+
+#desktop-sidenav.sidebar-collapsed .px-md {
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+  justify-content: center !important;
+}
+
+#desktop-sidenav.sidebar-collapsed .px-sm {
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+}
+
+#desktop-sidenav.sidebar-collapsed .nav-btn {
+  justify-content: center !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border-radius: 0.5rem !important;
+}
+
+#desktop-sidenav.sidebar-collapsed #btn-support,
+#desktop-sidenav.sidebar-collapsed #btn-help {
+  justify-content: center !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Price overlay refinements */
+#chart-price-overlay {
+  @apply top-4 right-4 z-10;
+  gap: 6;
+}
+
+#chart-last-price {
+  @apply px-4 py-2 rounded-lg border border-overlay-border/50 bg-overlay-bg/95 backdrop-blur-md shadow-lg;
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+#chart-last-change {
+  @apply px-3 py-1.5 rounded-lg border border-overlay-border/50 bg-overlay-bg/95 backdrop-blur-md shadow-lg;
+  font-size: 0.875rem;
+}
+
+/* Crosshair line refinements */
+.crosshair-line {
+  @apply bg-chart-crosshair/60;
+}
+
+.crosshair-h { height: 1px; left: 0; right: 0; }
+.crosshair-v { width: 1px; top: 0; bottom: 0; }
+
+/* Crosshair tooltip refinements */
+.crosshair-tooltip {
+  @apply absolute pointer-events-none z-30 px-3 py-2 rounded-lg text-data-sm font-mono bg-overlay-bg/95 border border-overlay-border shadow-xl;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  white-space: nowrap;
+  transform: translateX(-50%);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.crosshair-tooltip.y-axis {
+  transform: translateY(-50%);
+  left: auto;
+  right: 4px;
+}
+
+/* Last price overlay */
+#chart-last-price {
+  @apply px-4 py-2 rounded-lg border border-overlay-border/50 bg-overlay-bg/95 backdrop-blur-md shadow-lg;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+#chart-last-change {
+  @apply px-3 py-1.5 rounded-lg border border-overlay-border/50 bg-overlay-bg/95 backdrop-blur-md shadow-lg;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Applied indicators bar */
+.applied-indicators-bar {
+  @apply px-3 py-2 border-b border-border-primary/50 bg-bg-secondary/80 backdrop-blur-sm;
+  gap: 2;
+}
+
+.applied-indicator-tag {
+  @apply flex items-center gap-1.5 px-2.5 py-1 bg-bg-hover border border-border-primary rounded text-sm font-mono text-text-secondary;
+  transition: all 0.15s ease;
+}
+
+.applied-indicator-tag:hover {
+  @apply bg-bg-hover border-border-primary;
+}
+
+.applied-indicator-tag .remove-btn {
+  @apply p-0.5 hover:bg-red-500/20 hover:text-accent-red rounded transition-colors;
+}
+
+/* Chart container */
+#tv-chart-container {
+  @apply w-full h-full min-h-[400px];
+}
+
+/* Chart grid overlay - softer grid */
+.chart-grid-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: 
+    linear-gradient(to right, #1e293b 1px, transparent 1px),
+    linear-gradient(to bottom, #1e293b 1px, transparent 1px);
+  background-size: 80px 80px;
+  z-index: 1;
+  opacity: 0.6;
+}
+
+/* Crosshair line refinements */
+.crosshair-h, .crosshair-v {
+  @apply bg-chart-crosshair/50;
+}
+
+/* Crosshair tooltip refinements */
+.crosshair-tooltip {
+  @apply absolute pointer-events-none z-40 px-3 py-2 rounded-lg text-data-sm font-mono bg-overlay-bg/98 border border-overlay-border shadow-xl;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  white-space: nowrap;
+  transform: translateX(-50%);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.35);
+  border-radius: 10px;
+}
+
+.crosshair-tooltip.y-axis {
+  transform: translateY(-50%);
+  left: auto;
+  right: 8px;
+}
+
+.crosshair-tooltip > div:first-child {
+  @apply font-semibold text-text-primary mb-1;
+}
+
+.crosshair-tooltip .font-mono {
+  @apply text-sm tabular-nums;
+}
+
+/* Applied indicators tag refinements */
+.applied-indicator-tag {
+  @apply flex items-center gap-1.5 px-3 py-1.5 bg-bg-hover/90 border border-border-primary/60 rounded-lg text-sm font-mono text-text-secondary;
+  transition: all 0.15s ease;
+}
+
+.applied-indicator-tag:hover {
+  @apply bg-bg-hover border-border-primary;
+}
+
+.applied-indicator-tag .w-1\.5 {
+  @apply rounded-full;
+}
+
+.applied-indicator-tag .remove-btn {
+  @apply p-1 rounded transition-all duration-150 opacity-50 hover:opacity-100;
+}
+
+/* Price scale overlay */
+#chart-price-overlay {
+  @apply top-4 right-4 z-10;
+  gap: 8;
+}
+
+#chart-last-price {
+  @apply px-4 py-2 rounded-lg border border-overlay-border/60 bg-overlay-bg/95 backdrop-blur-md shadow-xl;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  min-width: 140px;
+  text-align: right;
+}
+
+#chart-last-change {
+  @apply px-3 py-1.5 rounded-lg border border-overlay-border/60 bg-overlay-bg/95 backdrop-blur-md shadow-xl;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Chart container */
+#tv-chart-container {
+  @apply w-full h-full min-h-[400px];
+}
+
+/* Chart grid overlay - softer grid */
+.chart-grid-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: 
+    linear-gradient(to right, #1e293b 1px, transparent 1px),
+    linear-gradient(to bottom, #1e293b 1px, transparent 1px);
+  background-size: 80px 80px;
+  z-index: 1;
+  opacity: 0.5;
+}
+
+/* Crosshair line refinements */
+.crosshair-h, .crosshair-v {
+  @apply bg-chart-crosshair/50;
+}
+
+/* Crosshair tooltip refinements */
+.crosshair-tooltip {
+  @apply absolute pointer-events-none z-40 px-3 py-2 rounded-lg text-data-sm font-mono bg-overlay-bg/98 border border-overlay-border shadow-xl;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  white-space: nowrap;
+  transform: translateX(-50%);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.35);
+  border-radius: 10px;
+}
+
+.crosshair-tooltip.y-axis {
+  transform: translateY(-50%);
+  left: auto;
+  right: 8px;
+}
+
+.crosshair-tooltip > div:first-child {
+  @apply font-semibold text-text-primary mb-1;
+}
+
+.crosshair-tooltip .font-mono {
+  @apply text-sm tabular-nums;
+}
+
+/* Applied indicators tag refinements */
+.applied-indicator-tag {
+  @apply flex items-center gap-1.5 px-3 py-1.5 bg-bg-hover/90 border border-border-primary/60 rounded-lg text-sm font-mono text-text-secondary;
+  transition: all 0.15s ease;
+}
+
+.applied-indicator-tag:hover {
+  @apply bg-bg-hover border-border-primary;
+}
+
+.applied-indicator-tag .w-1\.5 {
+  @apply rounded-full;
+}
+
+.applied-indicator-tag .remove-btn {
+  @apply p-1 rounded transition-all duration-150 opacity-50 hover:opacity-100;
+}
+
+/* Price scale overlay */
+#chart-price-overlay {
+  @apply top-4 right-4 z-10;
+  gap: 8;
+}
+
+#chart-last-price {
+  @apply px-4 py-2 rounded-lg border border-overlay-border/60 bg-overlay-bg/95 backdrop-blur-md shadow-xl;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  min-width: 140px;
+  text-align: right;
+}
+
+#chart-last-change {
+  @apply px-3 py-1.5 rounded-lg border border-overlay-border/60 bg-overlay-bg/95 backdrop-blur-md shadow-xl;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Chart container */
+#tv-chart-container {
+  @apply w-full h-full min-h-[400px];
+}
+
+/* Chart grid overlay - softer grid */
+.chart-grid-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: 
+    linear-gradient(to right, #1e293b 1px, transparent 1px),
+    linear-gradient(to bottom, #1e293b 1px, transparent 1px);
+  background-size: 80px 80px;
+  z-index: 1;
+  opacity: 0.5;
+}
+
+/* Crosshair line refinements */
+.crosshair-h, .crosshair-v {
+  @apply bg-chart-crosshair/50;
+}
+
+/* Tooltip refinements for price scale */
+#chart-overlay-symbol {
+  @apply font-bold text-text-primary text-sm;
+}
+
+#chart-overlay-name {
+  @apply text-text-muted text-sm;
+}
+
+/* Drawing tools */
+.drawing-tool-btn {
+  @apply p-2 rounded-lg transition-all duration-150 text-text-muted hover:text-text-primary hover:bg-sidebar-hover;
+}
+
+.drawing-tool-btn.active {
+  @apply text-accent-blue bg-accent-blue/15;
+}
+
+#drawing-tools {
+  @apply w-12 border-r border-border-primary/50 bg-sidebar-bg/80 backdrop-blur-sm;
+}
+
+/* Toolbar container */
+#view-charts > div:first-child {
+  @apply rounded-t-xl border-b border-toolbar-border/50;
+}
+
+/* Symbol dropdown */
+#chart-symbol-dropdown-btn {
+  @apply px-3 py-2 rounded-lg transition-all duration-150 text-text-primary;
+}
+
+#chart-symbol-dropdown-btn:hover {
+  @apply bg-toolbar-btn-hover;
+}
+
+#chart-symbol-dropdown-btn .material-symbols-outlined {
+  @apply transition-transform duration-200;
+}
+
+/* Light theme chart overrides */
+:not(.dark) .chart-grid-overlay {
+  background-image: 
+    linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+    linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+  opacity: 0.6;
+}
+:not(.dark) .crosshair-line {
+  background: rgba(198, 198, 205, 0.6);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
   </style>
 </head>
-<body class="bg-background text-on-background font-body-md antialiased overflow-hidden flex h-screen selection:bg-primary-fixed selection:text-on-primary-fixed">
-
-  <!-- Desktop SideNavBar -->
-  <nav id="desktop-sidenav" class="hidden md:flex flex-col h-full py-stack-md bg-surface-container text-primary font-label-caps text-label-caps border-r border-outline-variant docked left-0 h-screen w-64 flex-shrink-0 z-40">
-    <div class="px-md mb-xl flex items-center gap-sm">
-      <div aria-label="System Status Indicator" class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
-        <span class="material-symbols-outlined text-on-primary text-[18px]">graphic_eq</span>
+<body class="bg-bg-primary text-text-primary font-body antialiased overflow-hidden flex h-screen selection:bg-accent-blue/30 selection:text-text-primary">  <!-- Desktop SideNavBar -->
+  <nav id="desktop-sidenav" class="hidden md:flex flex-col h-full py-stack-md bg-sidebar-bg text-text-primary font-label text-label border-r border-sidebar-border docked left-0 h-screen w-64 flex-shrink-0 z-[40]">
+    <div class="px-md mb-xl flex items-center justify-between gap-sm">
+      <div class="flex items-center gap-sm overflow-hidden">
+        <div aria-label="System Status Indicator" class="w-8 h-8 rounded-full bg-accent-blue flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-white text-[18px]">graphic_eq</span>
+        </div>
+        <div class="sidebar-text-label whitespace-nowrap">
+          <h1 class="font-headline text-2xl font-bold text-text-primary tracking-tighter">QuantVeda</h1>
+          <p class="font-label-sm text-label-sm text-text-secondary uppercase tracking-widest text-[10px]">Live Engine</p>
+        </div>
       </div>
-      <div>
-        <h1 class="font-headline-md text-headline-md text-primary tracking-tighter">Terminal</h1>
-        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Live Engine</p>
-      </div>
+      <button id="btn-toggle-sidebar" class="hidden md:flex p-1.5 text-text-muted hover:text-text-primary hover:bg-sidebar-hover rounded-lg transition-colors shrink-0" title="Toggle Sidebar (Collapse/Expand)">
+        <span class="material-symbols-outlined text-sm" id="sidebar-toggle-icon">menu_open</span>
+      </button>
     </div>
     
     <ul class="flex flex-col flex-grow gap-base px-sm">
       <li>
-        <button data-target-view="dashboard" class="nav-btn nav-item-active w-full flex items-center gap-sm px-sm py-xs text-primary rounded-r-lg hover:bg-surface-container-highest transition-colors text-left font-label-caps text-label-caps">
-          <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
-          <span>Dashboard</span>
+        <button data-target-view="dashboard" title="Dashboard" class="nav-btn nav-item-active w-full flex items-center gap-sm px-sm py-xs text-text-primary rounded-r-lg hover:bg-sidebar-hover transition-colors text-left font-label text-label">
+          <span class="material-symbols-outlined shrink-0" data-icon="dashboard">dashboard</span>
+          <span class="sidebar-text-label">Dashboard</span>
         </button>
       </li>
       <li>
-        <button data-target-view="charts" class="nav-btn w-full flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-colors rounded-r-lg text-left font-label-caps text-label-caps">
-          <span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
-          <span>Charts</span>
+        <button data-target-view="charts" title="Charts" class="nav-btn w-full flex items-center gap-sm px-sm py-xs text-text-secondary hover:text-text-primary hover:bg-sidebar-hover transition-colors rounded-r-lg text-left font-label text-label">
+          <span class="material-symbols-outlined shrink-0" data-icon="query_stats">query_stats</span>
+          <span class="sidebar-text-label">Charts</span>
         </button>
       </li>
       <li>
-        <button data-target-view="watchlists" class="nav-btn w-full flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-colors rounded-r-lg text-left font-label-caps text-label-caps">
-          <span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
-          <span>Watchlists</span>
+        <button data-target-view="watchlists" title="Watchlists" class="nav-btn w-full flex items-center gap-sm px-sm py-xs text-text-secondary hover:text-text-primary hover:bg-sidebar-hover transition-colors rounded-r-lg text-left font-label text-label">
+          <span class="material-symbols-outlined shrink-0" data-icon="list_alt">list_alt</span>
+          <span class="sidebar-text-label">Watchlists</span>
         </button>
       </li>
       <li>
-        <button data-target-view="portfolio" class="nav-btn w-full flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-colors rounded-r-lg text-left font-label-caps text-label-caps">
-          <span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
-          <span>Portfolio</span>
+        <button data-target-view="portfolio" title="Portfolio" class="nav-btn w-full flex items-center gap-sm px-sm py-xs text-text-secondary hover:text-text-primary hover:bg-sidebar-hover transition-colors rounded-r-lg text-left font-label text-label">
+          <span class="material-symbols-outlined shrink-0" data-icon="account_balance_wallet">account_balance_wallet</span>
+          <span class="sidebar-text-label">Portfolio</span>
         </button>
       </li>
       <li>
-        <button data-target-view="scanner" class="nav-btn w-full flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-colors rounded-r-lg text-left font-label-caps text-label-caps">
-          <span class="material-symbols-outlined" data-icon="search_insights">search_insights</span>
-          <span>Scanner</span>
+        <button data-target-view="scanner" title="Scanner" class="nav-btn w-full flex items-center gap-sm px-sm py-xs text-text-secondary hover:text-text-primary hover:bg-sidebar-hover transition-colors rounded-r-lg text-left font-label text-label">
+          <span class="material-symbols-outlined shrink-0" data-icon="search_insights">search_insights</span>
+          <span class="sidebar-text-label">Scanner</span>
         </button>
       </li>
       <li>
-        <button data-target-view="accuracy" class="nav-btn w-full flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-colors rounded-r-lg text-left font-label-caps text-label-caps">
-          <span class="material-symbols-outlined" data-icon="track_changes">track_changes</span>
-          <span>Accuracy Tracker</span>
+        <button data-target-view="accuracy" title="Accuracy Tracker" class="nav-btn w-full flex items-center gap-sm px-sm py-xs text-text-secondary hover:text-text-primary hover:bg-sidebar-hover transition-colors rounded-r-lg text-left font-label text-label">
+          <span class="material-symbols-outlined shrink-0" data-icon="track_changes">track_changes</span>
+          <span class="sidebar-text-label">Accuracy Tracker</span>
         </button>
       </li>
       <li>
-        <button data-target-view="settings" class="nav-btn w-full flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-colors rounded-r-lg text-left font-label-caps text-label-caps">
-          <span class="material-symbols-outlined" data-icon="settings">settings</span>
-          <span>Settings</span>
+        <button data-target-view="settings" title="Settings" class="nav-btn w-full flex items-center gap-sm px-sm py-xs text-text-secondary hover:text-text-primary hover:bg-sidebar-hover transition-colors rounded-r-lg text-left font-label text-label">
+          <span class="material-symbols-outlined shrink-0" data-icon="settings">settings</span>
+          <span class="sidebar-text-label">Settings</span>
         </button>
       </li>
     </ul>
@@ -215,15 +1184,15 @@
     <div class="px-sm mt-auto">
       <ul class="flex flex-col gap-base">
         <li>
-          <button id="btn-support" class="w-full flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-colors rounded-lg text-left font-label-caps text-label-caps">
-            <span class="material-symbols-outlined" data-icon="support_agent">support_agent</span>
-            <span>Support</span>
+          <button id="btn-support" title="Support" class="w-full flex items-center gap-sm px-sm py-xs text-text-secondary hover:text-text-primary hover:bg-sidebar-hover transition-colors rounded-lg text-left font-label text-label">
+            <span class="material-symbols-outlined shrink-0" data-icon="support_agent">support_agent</span>
+            <span class="sidebar-text-label">Support</span>
           </button>
         </li>
         <li>
-          <button id="btn-help" class="w-full flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-colors rounded-lg text-left font-label-caps text-label-caps">
-            <span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
-            <span>Help</span>
+          <button id="btn-help" title="Help" class="w-full flex items-center gap-sm px-sm py-xs text-text-secondary hover:text-text-primary hover:bg-sidebar-hover transition-colors rounded-lg text-left font-label text-label">
+            <span class="material-symbols-outlined shrink-0" data-icon="help_outline">help_outline</span>
+            <span class="sidebar-text-label">Help</span>
           </button>
         </li>
       </ul>
@@ -231,54 +1200,53 @@
   </nav>
 
   <!-- Mobile Drawer Overlay -->
-  <div id="mobile-drawer" class="fixed inset-0 bg-black/50 z-50 hidden md:hidden flex">
-    <div class="bg-surface-container w-64 h-full p-4 flex flex-col justify-between shadow-2xl">
+  <div id="mobile-drawer" class="fixed inset-0 bg-black/60 z-[50] hidden md:hidden flex">
+    <div class="bg-sidebar-bg w-64 h-full p-4 flex flex-col justify-between shadow-modal">
       <div>
-        <div class="flex items-center justify-between mb-6">
-          <div class="font-headline-md text-headline-md font-bold text-primary">Terminal</div>
-          <button id="close-mobile-drawer" class="p-1 text-primary">
+        <div class="flex justify-between items-center mb-6">
+          <div class="font-headline text-xl font-bold text-text-primary tracking-tighter">QuantVeda</div>
+          <button id="close-mobile-drawer" class="p-1 text-text-primary hover:bg-sidebar-hover rounded transition-colors">
             <span class="material-symbols-outlined">close</span>
           </button>
         </div>
         <ul class="space-y-2">
-          <li><button data-target-view="dashboard" class="nav-btn-mobile w-full text-left py-2 px-3 rounded font-semibold text-primary bg-primary/10">Dashboard</button></li>
-          <li><button data-target-view="charts" class="nav-btn-mobile w-full text-left py-2 px-3 rounded text-on-surface-variant hover:bg-surface-container-high">Charts</button></li>
-          <li><button data-target-view="watchlists" class="nav-btn-mobile w-full text-left py-2 px-3 rounded text-on-surface-variant hover:bg-surface-container-high">Watchlists</button></li>
-          <li><button data-target-view="portfolio" class="nav-btn-mobile w-full text-left py-2 px-3 rounded text-on-surface-variant hover:bg-surface-container-high">Portfolio</button></li>
-          <li><button data-target-view="scanner" class="nav-btn-mobile w-full text-left py-2 px-3 rounded text-on-surface-variant hover:bg-surface-container-high">Scanner</button></li>
-          <li><button data-target-view="accuracy" class="nav-btn-mobile w-full text-left py-2 px-3 rounded text-on-surface-variant hover:bg-surface-container-high">Accuracy Tracker</button></li>
-          <li><button data-target-view="settings" class="nav-btn-mobile w-full text-left py-2 px-3 rounded text-on-surface-variant hover:bg-surface-container-high">Settings</button></li>
+          <li><button data-target-view="dashboard" class="nav-btn-mobile w-full text-left py-2 px-3 rounded text-text-primary font-medium hover:bg-sidebar-hover transition-colors">Dashboard</button></li>
+          <li><button data-target-view="charts" class="nav-btn-mobile w-full text-left py-2 px-3 rounded text-text-secondary hover:bg-sidebar-hover hover:text-text-primary transition-colors">Charts</button></li>
+          <li><button data-target-view="watchlists" class="nav-btn-mobile w-full text-left py-2 px-3 rounded text-text-secondary hover:bg-sidebar-hover hover:text-text-primary transition-colors">Watchlists</button></li>
+          <li><button data-target-view="portfolio" class="nav-btn-mobile w-full text-left py-2 px-3 rounded text-text-secondary hover:bg-sidebar-hover hover:text-text-primary transition-colors">Portfolio</button></li>
+          <li><button data-target-view="scanner" class="nav-btn-mobile w-full text-left py-2 px-3 rounded text-text-secondary hover:bg-sidebar-hover hover:text-text-primary transition-colors">Scanner</button></li>
+          <li><button data-target-view="accuracy" class="nav-btn-mobile w-full text-left py-2 px-3 rounded text-text-secondary hover:bg-sidebar-hover hover:text-text-primary transition-colors">Accuracy Tracker</button></li>
+          <li><button data-target-view="settings" class="nav-btn-mobile w-full text-left py-2 px-3 rounded text-text-secondary hover:bg-sidebar-hover hover:text-text-primary transition-colors">Settings</button></li>
         </ul>
       </div>
-      <div class="text-xs text-on-surface-variant font-data-mono">QuantVeda AI</div>
     </div>
   </div>
 
   <!-- Main Content Wrapper -->
-  <div class="flex-grow flex flex-col min-w-0 bg-surface h-screen overflow-hidden">
+  <div class="flex-grow flex flex-col min-w-0 bg-bg-secondary h-screen overflow-hidden">
     
     <!-- TopNavBar -->
-    <header class="flex justify-between items-center w-full px-container-padding h-16 bg-surface text-primary border-b border-outline-variant shadow-sm top-0 sticky z-30 shrink-0">
+    <header class="flex justify-between items-center w-full px-container-padding h-16 bg-toolbar-bg text-text-primary border-b border-toolbar-border shadow-toolbar top-0 sticky z-[30] shrink-0">
       
       <!-- Mobile Trigger + Brand Title -->
       <div class="flex items-center gap-sm">
-        <button id="open-mobile-drawer" class="md:hidden p-2 text-primary hover:bg-surface-container-high transition-colors rounded-full">
+        <button id="open-mobile-drawer" class="md:hidden p-2 text-text-primary hover:bg-toolbar-btn-hover transition-colors rounded-full">
           <span class="material-symbols-outlined">menu</span>
         </button>
-        <div class="md:hidden font-headline-md text-headline-md font-bold text-primary tracking-tighter">
-          QuantVeda AI
+        <div class="md:hidden font-headline text-xl font-bold text-text-primary tracking-tighter">
+          QuantVeda
         </div>
 
         <!-- Integrated Search Bar -->
-        <div class="hidden md:flex items-center bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-1.5 focus-within:border-primary transition-colors w-72 relative">
-          <span class="material-symbols-outlined text-on-surface-variant text-sm mr-2">search</span>
-          <input id="main-search-input" class="bg-transparent border-none outline-none text-sm w-full font-data-mono focus:ring-0 text-on-background placeholder-on-surface-variant uppercase" placeholder="Search symbols..." type="text" autocomplete="off" value="RELIANCE.NS">
-          <button id="clear-search-btn" class="hidden text-on-surface-variant hover:text-primary">
+        <div class="hidden md:flex items-center bg-input-bg border border-input-border rounded-lg px-3 py-1.5 focus-within:border-input-focus transition-colors w-72 relative">
+          <span class="material-symbols-outlined text-text-muted text-sm mr-2">search</span>
+          <input id="main-search-input" class="bg-transparent border-none outline-none text-sm w-full font-mono focus:ring-0 text-text-primary placeholder:text-muted uppercase" placeholder="Search symbols..." type="text" autocomplete="off" value="RELIANCE.NS">
+          <button id="clear-search-btn" class="hidden text-text-muted hover:text-text-primary">
             <span class="material-symbols-outlined text-sm">close</span>
           </button>
           
           <!-- Search Autocomplete Dropdown -->
-          <div id="search-autocomplete-dropdown" class="hidden absolute top-full left-0 right-0 mt-1 bg-surface-container-lowest border border-outline-variant rounded-lg shadow-xl overflow-hidden z-50 max-h-80 overflow-y-auto divide-y divide-outline-variant">
+          <div id="search-autocomplete-dropdown" class="hidden absolute top-full left-0 right-0 mt-1 bg-dropdown-bg border border-dropdown-border rounded-lg shadow-dropdown overflow-hidden z-[100] max-h-80 overflow-y-auto divide-y divide-dropdown-border">
           </div>
         </div>
       </div>
@@ -286,28 +1254,34 @@
       <!-- Right Header Controls -->
       <div class="flex items-center gap-md">
         <!-- Live Clock -->
-        <div class="hidden lg:flex items-center gap-1 font-data-mono text-xs text-on-surface-variant">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <div class="hidden lg:flex items-center gap-1 font-mono text-xs text-text-secondary">
+          <span class="w-2 h-2 rounded-full bg-bullish animate-pulse-soft"></span>
           <span id="header-live-clock">IST --:--:--</span>
         </div>
 
         <!-- AI Analysis Button -->
-        <button id="btn-ai-analysis" class="bg-primary text-on-primary px-4 py-2 rounded-lg font-label-sm text-label-sm hover:bg-primary/90 transition-colors shadow-sm active:scale-95 duration-200 flex items-center gap-2">
+        <button id="btn-ai-analysis" class="btn-primary flex items-center gap-2">
           <span class="material-symbols-outlined text-sm">psychology</span>
           <span>AI Analysis</span>
         </button>
 
         <div class="flex items-center gap-1">
-          <button id="btn-notifications" class="p-2 text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-full relative">
+          <button id="btn-notifications" class="btn-icon relative">
             <span class="material-symbols-outlined">notifications</span>
-            <span class="absolute top-1 right-1.5 w-2 h-2 bg-error rounded-full"></span>
+            <span class="absolute top-1 right-1.5 w-2 h-2 bg-bearish rounded-full"></span>
           </button>
-          <button id="btn-settings" class="p-2 text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-full hidden md:block">
+          
+          <!-- Theme Toggle Button -->
+          <button id="btn-theme-toggle" class="btn-icon" title="Toggle Theme" aria-label="Toggle Theme">
+            <span class="material-symbols-outlined" id="theme-toggle-icon">dark_mode</span>
+          </button>
+          
+          <button id="btn-settings" class="btn-icon hidden md:block">
             <span class="material-symbols-outlined">settings</span>
           </button>
         </div>
 
-        <div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant ml-1 cursor-pointer">
+        <div class="w-8 h-8 rounded-full bg-sidebar-hover overflow-hidden border border-border-primary ml-1 cursor-pointer">
           <img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC34f5fUI5kNkeaiMpZbb1meYNzUXtQ7KV-u-QJ3miaeOGgPr0461isJxF3vzrKWQSGZ9-P5W5FQd0SDC2m-rgvx6EIxIXTOUaC1yvtaNT2lmr-aoi4vIZ5KxsEuMzT3UjSpWnrhjvqSIEBsqiFBIGmiAZqrtK5b_qOCHImD8w7AIFI7PDhB04qz6jJrTBxSrwFKNbMYPhiNkt_9VCdFu8Lv1vqV_2XcpGuGq_aRUXJ7IXwVOnFrLrQ">
         </div>
       </div>
@@ -330,35 +1304,48 @@
       <!-- ================= VIEW 1: DASHBOARD ================= -->
       <section id="view-dashboard" class="space-y-md max-w-7xl mx-auto">
         
-        <!-- Top Row: Main Symbol Quote & AI Prediction -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-md">
+        <!-- Top Row: Main Symbol Quote & AI Prediction (items-start prevents grid stretching) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-md items-start">
           
-          <!-- Live Ticker / Main Hero Quote -->
-          <div class="lg:col-span-2 bg-[#FFFFFF] border border-[#E2E8F0] rounded-xl p-md flex flex-col justify-between shadow-sm">
-            <div class="flex justify-between items-start border-b border-[#E2E8F0] pb-sm mb-sm">
-              <div>
-                <h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-[#0F172A] flex items-center gap-2">
-                  <span id="dash-symbol-name">RELIANCE.NS</span>
-                  <span id="dash-company-name" class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container px-2 py-1 rounded">RELIANCE INDUSTRIES LTD.</span>
-                </h1>
-                <p id="dash-exchange-info" class="font-data-mono text-data-mono text-on-surface-variant mt-1">NSE • INR • Real-time Data</p>
+          <!-- Live Ticker / Main Hero Quote Card (Tightly wrapped around header + chart) -->
+          <div class="lg:col-span-2 bg-white dark:bg-[#0d1117] border border-[#e2e8f0] dark:border-[#21262d] rounded-2xl p-3 flex flex-col gap-2.5 shadow-sm hover:shadow-md transition-shadow h-fit">
+            
+            <!-- Header Row -->
+            <div class="flex justify-between items-center pb-2 border-b border-[#f1f5f9] dark:border-[#21262d]">
+              <div class="flex items-center gap-2.5">
+                <div class="w-7.5 h-7.5 rounded-full bg-accent-blue/15 text-accent-blue font-bold flex items-center justify-center text-xs font-mono shrink-0 shadow-sm">
+                  NSE
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h1 id="dash-symbol-name" class="font-headline text-base font-bold text-[#0f172a] dark:text-[#e6edf3] tracking-tight flex items-center">
+                      <span class="inline-block w-36 h-5 bg-border-primary/40 animate-pulse rounded"></span>
+                    </h1>
+                    <span id="dash-company-name" class="text-xs text-[#64748b] dark:text-[#8b949e] font-medium bg-[#f1f5f9] dark:bg-[#161b22] px-2 py-0.5 rounded-full inline-flex items-center">
+                      <span class="inline-block w-20 h-3.5 bg-border-primary/30 animate-pulse rounded"></span>
+                    </span>
+                  </div>
+                  <p id="dash-exchange-info" class="text-[10px] text-[#64748b] dark:text-[#8b949e] font-mono mt-0.5">NSE • INR • Live 1-Day Intraday</p>
+                </div>
               </div>
               <div class="text-right">
-                <div id="dash-price-val" class="font-display-lg text-display-lg text-[#0F172A] tracking-tighter">₹2,940.50</div>
-                <div id="dash-change-val" class="font-data-mono text-data-mono text-[#059669] flex items-center justify-end gap-1 mt-1">
-                  <span class="material-symbols-outlined text-sm">arrow_upward</span>
-                  +2.31 (+1.24%)
+                <div id="dash-price-val" class="font-headline text-lg font-extrabold text-[#0f172a] dark:text-[#e6edf3] tracking-tight flex items-center justify-end">
+                  <span class="inline-block w-24 h-5 bg-border-primary/40 animate-pulse rounded"></span>
+                </div>
+                <div id="dash-change-val" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold font-mono bg-border-primary/20 text-text-muted mt-0.5">
+                  <span class="inline-block w-16 h-3 bg-border-primary/40 animate-pulse rounded"></span>
                 </div>
               </div>
             </div>
 
-            <!-- Mini Sparkline / Preview Chart Canvas -->
-            <div class="flex-grow relative min-h-[300px] bg-surface-bright rounded border border-[#E2E8F0] p-3 flex flex-col justify-between">
-              <div class="flex justify-between items-center text-xs font-data-mono text-on-surface-variant">
-                <span>Intraday Performance</span>
-                <span class="text-emerald-600 font-semibold">Live Feed Connected</span>
+            <!-- Intraday 1-Day Performance Area Chart (Fixed Height: 200px, tight bottom bounds) -->
+            <div id="dash-chart-container" class="w-full h-[200px] relative bg-[#fafafa] dark:bg-[#090d16] rounded-xl border border-[#f1f5f9] dark:border-[#21262d] overflow-hidden">
+              <div id="dash-chart-loader" class="absolute inset-0 flex items-center justify-center bg-white/70 dark:bg-[#0d1117]/70 backdrop-blur-xs z-20 transition-opacity duration-200">
+                <div class="flex items-center gap-2 text-xs font-mono text-text-muted bg-modal-bg px-3 py-1.5 rounded-lg border border-modal-border shadow-sm">
+                  <span class="w-3.5 h-3.5 border-2 border-accent-blue border-t-transparent rounded-full animate-spin"></span>
+                  <span>Loading 1-Day Chart...</span>
+                </div>
               </div>
-              <div id="dash-chart-container" class="w-full h-[240px] relative"></div>
             </div>
           </div>
 
@@ -379,11 +1366,15 @@
               <div class="space-y-2 border-t border-[#E2E8F0] pt-sm">
                 <div class="flex justify-between font-data-mono text-data-mono">
                   <span class="text-on-surface-variant">Target Price</span>
-                  <span id="ai-target-price" class="text-[#0F172A] font-bold">$205.00</span>
+                  <span id="ai-target-price" class="text-[#0F172A] font-bold">
+                    <span class="inline-block w-16 h-4 bg-border-primary/40 animate-pulse rounded"></span>
+                  </span>
                 </div>
                 <div class="flex justify-between font-data-mono text-data-mono">
                   <span class="text-on-surface-variant">Stop Loss</span>
-                  <span id="ai-stop-loss" class="text-[#E11D48]">$182.50</span>
+                  <span id="ai-stop-loss" class="text-[#E11D48]">
+                    <span class="inline-block w-16 h-4 bg-border-primary/40 animate-pulse rounded"></span>
+                  </span>
                 </div>
                 <div class="flex justify-between font-data-mono text-data-mono">
                   <span class="text-on-surface-variant">Time Horizon</span>
@@ -454,59 +1445,111 @@
 
 
       <!-- ================= VIEW 2: CHARTS ================= -->
-      <section id="view-charts" class="hidden h-full flex flex-col border border-outline-variant rounded-xl overflow-hidden bg-surface-container-lowest shadow-sm">
+      <section id="view-charts" class="hidden h-full flex flex-col border border-border-primary rounded-xl overflow-hidden bg-chart-bg">
         
-        <!-- Chart Toolbar -->
-        <div class="h-14 border-b border-outline-variant flex items-center justify-between px-4 bg-surface shrink-0">
-          <div class="flex items-center gap-4">
+        <!-- Chart Toolbar (TradingView Style) -->
+        <div class="h-12 border-b border-toolbar-border flex items-center justify-between px-3 bg-toolbar-bg shrink-0">
+          <div class="flex items-center gap-2">
             <!-- Symbol Selector Dropdown -->
-            <div id="chart-symbol-dropdown-btn" class="flex items-center gap-2 cursor-pointer hover:bg-surface-container-high px-3 py-1.5 rounded transition-colors">
-              <span id="chart-current-symbol" class="font-headline-lg-mobile text-headline-lg-mobile text-primary">AAPL</span>
-              <span class="material-symbols-outlined text-sm">expand_more</span>
+            <div id="chart-symbol-dropdown-btn" class="flex items-center gap-2 cursor-pointer hover:bg-toolbar-btn-hover px-2.5 py-1.5 rounded-lg transition-colors border border-border-primary/50">
+              <span id="chart-current-symbol" class="font-bold text-text-primary text-xs font-mono">RELIANCE.NS</span>
+              <span class="material-symbols-outlined text-xs text-text-muted">expand_more</span>
             </div>
 
-            <div class="h-6 w-px bg-outline-variant mx-2"></div>
+            <div class="h-5 w-px bg-border-primary mx-0.5"></div>
 
-            <!-- Timeframes -->
-            <div class="flex items-center gap-1 font-label-sm text-label-sm" id="chart-timeframe-selector">
-              <button data-tf="1m" class="tf-btn px-2 py-1 rounded text-on-surface-variant hover:bg-surface-container-high">1m</button>
-              <button data-tf="5m" class="tf-btn px-2 py-1 rounded text-on-surface-variant hover:bg-surface-container-high">5m</button>
-              <button data-tf="15m" class="tf-btn px-2 py-1 rounded text-on-surface-variant hover:bg-surface-container-high">15m</button>
-              <button data-tf="1h" class="tf-btn px-2 py-1 rounded text-on-surface-variant hover:bg-surface-container-high">1H</button>
-              <button data-tf="4h" class="tf-btn px-2 py-1 rounded text-on-surface-variant hover:bg-surface-container-high">4H</button>
-              <button data-tf="1d" class="tf-btn px-2 py-1 rounded bg-primary/10 text-primary font-bold">1D</button>
+            <!-- Interval Selector Dropdown (TradingView Style) -->
+            <div class="relative" id="chart-interval-dropdown-container">
+              <button id="chart-interval-dropdown-btn" class="toolbar-btn flex items-center gap-1 font-semibold text-xs text-text-primary px-2.5 py-1.5 rounded-lg border border-border-primary/50 hover:bg-toolbar-btn-hover transition-colors">
+                <span id="current-interval-label">1D</span>
+                <span class="material-symbols-outlined text-xs text-text-muted">expand_more</span>
+              </button>
+              
+              <div id="chart-interval-menu" class="hidden absolute top-full left-0 mt-1 w-28 bg-modal-bg border border-modal-border rounded-lg shadow-dropdown z-[120] py-1">
+                <button data-tf="1m" class="interval-menu-item w-full text-left px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary hover:bg-bg-hover font-medium transition-colors flex items-center justify-between">1m <span class="active-check hidden text-accent-blue font-bold">✓</span></button>
+                <button data-tf="5m" class="interval-menu-item w-full text-left px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary hover:bg-bg-hover font-medium transition-colors flex items-center justify-between">5m <span class="active-check hidden text-accent-blue font-bold">✓</span></button>
+                <button data-tf="15m" class="interval-menu-item w-full text-left px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary hover:bg-bg-hover font-medium transition-colors flex items-center justify-between">15m <span class="active-check hidden text-accent-blue font-bold">✓</span></button>
+                <button data-tf="1h" class="interval-menu-item w-full text-left px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary hover:bg-bg-hover font-medium transition-colors flex items-center justify-between">1H <span class="active-check hidden text-accent-blue font-bold">✓</span></button>
+                <button data-tf="4h" class="interval-menu-item w-full text-left px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary hover:bg-bg-hover font-medium transition-colors flex items-center justify-between">4H <span class="active-check hidden text-accent-blue font-bold">✓</span></button>
+                <button data-tf="1d" class="interval-menu-item w-full text-left px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary hover:bg-bg-hover font-medium transition-colors flex items-center justify-between">1D <span class="active-check hidden text-accent-blue font-bold">✓</span></button>
+                <button data-tf="1w" class="interval-menu-item w-full text-left px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary hover:bg-bg-hover font-medium transition-colors flex items-center justify-between">1W <span class="active-check hidden text-accent-blue font-bold">✓</span></button>
+                <button data-tf="1M" class="interval-menu-item w-full text-left px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary hover:bg-bg-hover font-medium transition-colors flex items-center justify-between">1M <span class="active-check hidden text-accent-blue font-bold">✓</span></button>
+              </div>
             </div>
 
-            <div class="h-6 w-px bg-outline-variant mx-2"></div>
+            <div class="h-5 w-px bg-border-primary mx-0.5"></div>
 
-            <!-- Range Buttons -->
-            <div class="flex items-center gap-1 font-label-sm text-label-sm" id="chart-range-selector">
-              <button data-range="5d" class="range-btn px-2 py-1 rounded text-on-surface-variant hover:bg-surface-container-high">5D</button>
-              <button data-range="1mo" class="range-btn px-2 py-1 rounded text-on-surface-variant hover:bg-surface-container-high">1M</button>
-              <button data-range="3mo" class="range-btn px-2 py-1 rounded text-on-surface-variant hover:bg-surface-container-high">3M</button>
-              <button data-range="6mo" class="range-btn px-2 py-1 rounded text-on-surface-variant hover:bg-surface-container-high">6M</button>
-              <button data-range="1y" class="range-btn px-2 py-1 rounded text-on-surface-variant hover:bg-surface-container-high">1Y</button>
-              <button data-range="5y" class="range-btn px-2 py-1 rounded text-on-surface-variant hover:bg-surface-container-high">5Y</button>
-              <button data-range="max" class="range-btn px-2 py-1 rounded bg-primary/10 text-primary font-bold">MAX</button>
-              <button data-range="all" class="range-btn px-2 py-1 rounded text-on-surface-variant hover:bg-surface-container-high">ALL</button>
+            <!-- Candle / Chart Type Dropdown (TradingView Style) -->
+            <div class="relative" id="chart-type-dropdown-container">
+              <button id="chart-type-dropdown-btn" class="toolbar-btn flex items-center gap-1.5 font-medium text-xs text-text-secondary hover:text-text-primary px-2.5 py-1.5 rounded-lg border border-border-primary/50 hover:bg-toolbar-btn-hover transition-colors" title="Chart Type">
+                <span class="material-symbols-outlined text-sm text-accent-blue" id="current-chart-type-icon">candlestick_chart</span>
+                <span id="current-chart-type-label" class="hidden sm:inline">Candles</span>
+                <span class="material-symbols-outlined text-xs text-text-muted">expand_more</span>
+              </button>
+              
+              <div id="chart-type-menu" class="hidden absolute top-full left-0 mt-1 w-44 bg-modal-bg border border-modal-border rounded-lg shadow-dropdown z-[120] py-1">
+                <button data-type="candles" class="chart-type-item w-full text-left px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors flex items-center gap-2">
+                  <span class="material-symbols-outlined text-sm text-accent-blue">candlestick_chart</span>
+                  <span>Candles</span>
+                </button>
+                <button data-type="hollow" class="chart-type-item w-full text-left px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors flex items-center gap-2">
+                  <span class="material-symbols-outlined text-sm text-emerald-500">candlestick_chart</span>
+                  <span>Hollow Candles</span>
+                </button>
+                <button data-type="line" class="chart-type-item w-full text-left px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors flex items-center gap-2">
+                  <span class="material-symbols-outlined text-sm text-blue-400">show_chart</span>
+                  <span>Line</span>
+                </button>
+                <button data-type="area" class="chart-type-item w-full text-left px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors flex items-center gap-2">
+                  <span class="material-symbols-outlined text-sm text-cyan-400">area_chart</span>
+                  <span>Area</span>
+                </button>
+                <button data-type="bars" class="chart-type-item w-full text-left px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors flex items-center gap-2">
+                  <span class="material-symbols-outlined text-sm text-amber-400">bar_chart</span>
+                  <span>Bars</span>
+                </button>
+                <button data-type="heikin" class="chart-type-item w-full text-left px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors flex items-center gap-2">
+                  <span class="material-symbols-outlined text-sm text-purple-400">candlestick_chart</span>
+                  <span>Heikin Ashi</span>
+                </button>
+              </div>
             </div>
 
-            <div class="h-6 w-px bg-outline-variant mx-2"></div>
+            <div class="h-5 w-px bg-border-primary mx-0.5"></div>
 
-            <!-- Chart Type Toggles -->
-            <div class="flex items-center gap-2 text-on-surface-variant">
-              <button id="chart-type-candles" class="p-1.5 rounded hover:bg-surface-container-high text-primary bg-surface-container-high" title="Candlestick"><span class="material-symbols-outlined text-sm">candlestick_chart</span></button>
-              <button id="chart-type-line" class="p-1.5 rounded hover:bg-surface-container-high" title="Line Chart"><span class="material-symbols-outlined text-sm">show_chart</span></button>
-              <button id="chart-type-bars" class="p-1.5 rounded hover:bg-surface-container-high" title="Bar Chart"><span class="material-symbols-outlined text-sm">bar_chart</span></button>
+            <!-- Applied Indicators Bar -->
+            <div class="applied-indicators-bar flex-1 max-w-md" id="applied-indicators-bar">
+              <div class="flex items-center gap-1.5 flex-wrap" id="applied-indicators-list">
+                <!-- Populated dynamically -->
+              </div>
             </div>
           </div>
 
-          <div class="flex items-center gap-3">
-            <button id="btn-chart-indicators" class="flex items-center gap-1 text-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors px-3 py-1.5 rounded border border-outline-variant hover:border-primary">
-              <span class="material-symbols-outlined text-sm">functions</span> Indicators
+          <div class="flex items-center gap-1">
+            <!-- Indicators Button -->
+            <button id="btn-chart-indicators" class="btn-ghost flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-border-primary/50 hover:bg-toolbar-btn-hover text-text-primary" title="Indicators (/)">
+              <span class="material-symbols-outlined text-sm text-accent-blue">functions</span>
+              <span>Indicators</span>
             </button>
-            <button id="btn-chart-fullscreen" class="p-1.5 text-on-surface-variant hover:bg-surface-container-high rounded transition-colors">
-              <span class="material-symbols-outlined">fullscreen</span>
+            
+            <!-- Alert Button -->
+            <button id="btn-chart-alert" class="btn-icon" title="Create Alert (Alt+A)">
+              <span class="material-symbols-outlined text-sm">notifications</span>
+            </button>
+            
+            <!-- Replay Button -->
+            <button id="btn-chart-replay" class="btn-icon" title="Replay">
+              <span class="material-symbols-outlined text-sm">replay</span>
+            </button>
+            
+            <!-- Settings Button -->
+            <button id="btn-chart-settings" class="btn-icon" title="Chart Settings">
+              <span class="material-symbols-outlined text-sm">settings</span>
+            </button>
+            
+            <!-- Fullscreen Button -->
+            <button id="btn-chart-fullscreen" class="btn-icon" title="Fullscreen">
+              <span class="material-symbols-outlined text-sm">fullscreen</span>
             </button>
           </div>
         </div>
@@ -514,35 +1557,99 @@
         <!-- Main Chart Area -->
         <div class="flex-1 flex relative min-h-[450px]">
           <!-- Left Drawing Tools -->
-          <div class="w-12 border-r border-outline-variant bg-surface flex flex-col items-center py-2 gap-2 text-on-surface-variant shrink-0">
-            <button class="p-2 hover:bg-surface-container-high rounded text-primary" title="Select"><span class="material-symbols-outlined text-sm">near_me</span></button>
-            <button class="p-2 hover:bg-surface-container-high rounded" title="Trendline"><span class="material-symbols-outlined text-sm">horizontal_rule</span></button>
-            <button class="p-2 hover:bg-surface-container-high rounded" title="Free Draw"><span class="material-symbols-outlined text-sm">edit</span></button>
-            <button class="p-2 hover:bg-surface-container-high rounded" title="Shapes"><span class="material-symbols-outlined text-sm">format_shapes</span></button>
-            <button class="p-2 hover:bg-surface-container-high rounded" title="Text"><span class="material-symbols-outlined text-sm">text_fields</span></button>
-            <div class="h-px w-6 bg-outline-variant my-1"></div>
-            <button class="p-2 hover:bg-surface-container-high rounded" title="Measure"><span class="material-symbols-outlined text-sm">cloud_upload</span></button>
-            <button class="p-2 hover:bg-surface-container-high rounded" title="Zoom"><span class="material-symbols-outlined text-sm">zoom_in</span></button>
-            <button class="p-2 hover:bg-surface-container-high rounded mt-auto mb-2" title="Clear Canvas"><span class="material-symbols-outlined text-sm">delete</span></button>
+          <div class="w-11 border-r border-border-primary bg-sidebar-bg flex flex-col items-center py-2 gap-1 text-text-muted shrink-0" id="drawing-tools">
+            <button class="drawing-tool-btn p-1.5 hover:bg-sidebar-hover rounded text-text-primary" title="Select (Esc)" data-tool="select"><span class="material-symbols-outlined text-sm">mouse</span></button>
+            <button class="drawing-tool-btn p-1.5 hover:bg-sidebar-hover rounded" title="Trend Line (T)" data-tool="trendline"><span class="material-symbols-outlined text-sm">show_chart</span></button>
+            <button class="drawing-tool-btn p-1.5 hover:bg-sidebar-hover rounded" title="Horizontal Line (H)" data-tool="hline"><span class="material-symbols-outlined text-sm">minimize</span></button>
+            <button class="drawing-tool-btn p-1.5 hover:bg-sidebar-hover rounded" title="Vertical Line (V)" data-tool="vline"><span class="material-symbols-outlined text-sm">vertical_align_center</span></button>
+            <button class="drawing-tool-btn p-1.5 hover:bg-sidebar-hover rounded" title="Rectangle (R)" data-tool="rectangle"><span class="material-symbols-outlined text-sm">crop_free</span></button>
+            <button class="drawing-tool-btn p-1.5 hover:bg-sidebar-hover rounded" title="Text (X)" data-tool="text"><span class="material-symbols-outlined text-sm">text_fields</span></button>
+            <div class="h-px w-5 bg-border-primary my-0.5"></div>
+            <button class="drawing-tool-btn p-1.5 hover:bg-sidebar-hover rounded" title="Magnet Mode (M)" data-tool="magnet"><span class="material-symbols-outlined text-sm">magnet</span></button>
+            <button class="drawing-tool-btn p-1.5 hover:bg-sidebar-hover rounded" title="Stay in Drawing Mode (S)" data-tool="stay"><span class="material-symbols-outlined text-sm">lock_open</span></button>
+            <button class="drawing-tool-btn p-1.5 hover:bg-sidebar-hover rounded" title="Zoom (Z)" data-tool="zoom"><span class="material-symbols-outlined text-sm">zoom_in</span></button>
+            <div class="h-px w-5 bg-border-primary my-0.5"></div>
+            <button class="drawing-tool-btn p-1.5 hover:bg-sidebar-hover rounded" title="Measure (Shift+M)" data-tool="measure"><span class="material-symbols-outlined text-sm">straighten</span></button>
+            <button class="drawing-tool-btn p-1.5 hover:bg-sidebar-hover rounded" title="Clear Drawings (Del)" data-tool="clear"><span class="material-symbols-outlined text-sm">delete_sweep</span></button>
           </div>
 
           <!-- Interactive Chart Canvas Container -->
-          <div class="flex-1 bg-surface-container-lowest relative overflow-hidden flex flex-col">
-            <!-- Chart Info Overlay -->
-            <div class="absolute top-4 left-4 z-10 flex gap-4 text-sm font-data-mono text-data-mono">
-              <div class="flex items-center gap-2">
-                <span id="chart-overlay-symbol" class="font-bold text-primary">AAPL</span>
-                <span id="chart-overlay-name" class="text-on-surface-variant">Apple Inc.</span>
+          <div class="flex-1 bg-chart-bg relative overflow-hidden flex flex-col">
+            <!-- Chart Grid Overlay -->
+            <div class="chart-grid-overlay"></div>
+            
+            <!-- Top-Left Legend (TradingView Style) -->
+            <div class="absolute top-3 left-3 z-10 font-mono text-xs select-none space-y-1" id="chart-info-overlay">
+              <!-- Legend Header: Symbol Name + Timeframe + Exchange + SELL/BUY boxes + Collapse button -->
+              <div class="flex items-center gap-2 bg-modal-bg/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-modal-border/80 shadow-panel">
+                <button id="btn-toggle-legend-collapse" class="text-text-muted hover:text-text-primary p-0.5 rounded transition-transform" title="Toggle Legend View">
+                  <span class="material-symbols-outlined text-xs" id="legend-collapse-icon">expand_less</span>
+                </button>
+                
+                <div class="flex items-center gap-1.5 font-sans">
+                  <span id="tv-legend-name" class="font-bold text-text-primary text-xs">Reliance Industries Ltd.</span>
+                  <span class="text-text-muted">·</span>
+                  <span id="tv-legend-tf" class="text-text-secondary font-mono text-xs">1D</span>
+                  <span class="text-text-muted">·</span>
+                  <span id="tv-legend-exch" class="text-text-muted text-[11px]">NSE</span>
+                </div>
+                
+                <!-- Sell & Buy Price Quick Trading Boxes -->
+                <div class="flex items-center gap-1.5 ml-2 border-l border-border-primary/60 pl-2">
+                  <button id="btn-quick-sell" class="bg-rose-500/10 border border-rose-500/80 text-rose-500 hover:bg-rose-500/20 px-2 py-0.5 rounded text-[11px] font-mono font-bold transition-colors">
+                    SELL <span id="tv-sell-price">2,940.00</span>
+                  </button>
+                  <button id="btn-quick-buy" class="bg-accent-blue/10 border border-accent-blue/80 text-accent-blue hover:bg-accent-blue/20 px-2 py-0.5 rounded text-[11px] font-mono font-bold transition-colors">
+                    <span id="tv-buy-price">2,940.50</span> BUY
+                  </button>
+                </div>
               </div>
-              <div class="flex items-center gap-3 bg-surface/80 backdrop-blur px-3 py-1 rounded border border-outline-variant">
-                <span class="text-primary font-bold">O <span id="ohlc-o" class="font-normal text-on-surface-variant ml-1">172.50</span></span>
-                <span class="text-primary font-bold">H <span id="ohlc-h" class="font-normal text-on-surface-variant ml-1">173.25</span></span>
-                <span class="text-primary font-bold">L <span id="ohlc-l" class="font-normal text-on-surface-variant ml-1">171.80</span></span>
-                <span class="text-primary font-bold">C <span id="ohlc-c" class="font-normal text-on-surface-variant ml-1">172.95</span></span>
-                <span id="ohlc-chg" class="text-[#059669] ml-2">+0.45 (+0.26%)</span>
+
+              <!-- Legend Body (OHLC Values + Live Indicators List) -->
+              <div id="tv-legend-body" class="space-y-1">
+                <!-- OHLC Values Row -->
+                <div class="bg-modal-bg/80 backdrop-blur-md px-3 py-1 rounded-md border border-modal-border/60 flex items-center gap-3 text-[11px] font-mono">
+                  <span>O <strong id="ohlc-o" class="text-text-primary font-normal">—</strong></span>
+                  <span>H <strong id="ohlc-h" class="text-emerald-500 font-normal">—</strong></span>
+                  <span>L <strong id="ohlc-l" class="text-rose-500 font-normal">—</strong></span>
+                  <span>C <strong id="ohlc-c" class="text-text-primary font-bold">—</strong></span>
+                  <span id="ohlc-chg" class="text-emerald-500 font-semibold">—</span>
+                </div>
+
+                <!-- Active Indicators Live Values -->
+                <div id="tv-active-indicators-legend" class="space-y-0.5 font-mono text-[11px]">
+                  <!-- Populated dynamically e.g. SMA 20 close 2,935.40 -->
+                </div>
               </div>
             </div>
 
+            <!-- Bottom Left Bar: QuantVeda Paper Trading Bar -->
+            <div class="absolute bottom-2 left-3 z-10 flex items-center gap-2 bg-modal-bg/90 backdrop-blur-md px-3 py-1 rounded-lg border border-modal-border/80 shadow-md font-mono text-xs select-none" id="quantveda-paper-trading-bar">
+              <div class="flex items-center gap-1.5 cursor-pointer hover:text-accent-blue transition-colors" id="btn-open-paper-trading-menu">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="font-bold text-text-primary font-sans">QuantVeda</span>
+                <span class="text-text-secondary">Paper Trading</span>
+                <span class="material-symbols-outlined text-xs text-text-muted">expand_more</span>
+              </div>
+              <span class="text-border-primary/60">|</span>
+              <span id="chart-paper-wallet-balance" class="text-emerald-500 font-bold">₹1,00,000.00</span>
+            </div>
+
+            <!-- Crosshair Lines -->
+            <div class="crosshair-line crosshair-h hidden" id="crosshair-h"></div>
+            <div class="crosshair-line crosshair-v hidden" id="crosshair-v"></div>
+            
+            <!-- Crosshair Tooltips -->
+            <div class="crosshair-tooltip hidden" id="crosshair-tooltip-x"></div>
+            <div class="crosshair-tooltip y-axis hidden" id="crosshair-tooltip-y"></div>
+
+            <!-- Chart Loading Spinner -->
+            <div id="chart-loading-spinner" class="hidden absolute inset-0 z-50 flex items-center justify-center bg-chart-bg/80 backdrop-blur-sm">
+              <div class="flex flex-col items-center gap-3">
+                <div class="w-8 h-8 border-2 border-accent-blue/30 border-t-accent-blue rounded-full animate-spin"></div>
+                <span class="text-xs text-text-muted font-mono">Loading chart data...</span>
+              </div>
+            </div>
             <!-- TradingView Lightweight Charts Container -->
             <div id="tv-chart-container" class="w-full h-full min-h-[400px]"></div>
           </div>
@@ -922,56 +2029,89 @@
       <!-- ================= VIEW 7: SETTINGS ================= -->
       <section id="view-settings" class="hidden space-y-md max-w-4xl mx-auto">
         <div class="mb-lg">
-          <h2 class="font-headline-lg text-headline-lg text-primary">Settings</h2>
-          <p class="font-body-md text-body-md text-secondary mt-xs">Configure your QuantVeda AI trading terminal.</p>
+          <h2 class="font-headline-lg text-headline-lg text-text-primary">Settings</h2>
+          <p class="font-body-md text-body-md text-text-secondary mt-xs">Configure your QuantVeda trading terminal.</p>
+        </div>
+
+        <!-- Theme & Appearance -->
+        <div class="bg-modal-bg border border-modal-border rounded-xl shadow-panel overflow-hidden">
+          <div class="p-5 border-b border-modal-border bg-bg-tertiary flex items-center gap-3">
+            <span class="material-symbols-outlined text-accent-blue">palette</span>
+            <h3 class="font-bold text-lg text-text-primary">Theme & Appearance</h3>
+          </div>
+          <div class="p-6 space-y-4">
+            <div class="flex items-center justify-between py-3 border-b border-modal-border">
+              <div>
+                <div class="font-semibold text-sm text-text-primary">Color Theme</div>
+                <div class="text-xs text-text-muted">Choose your preferred color scheme</div>
+              </div>
+              <div class="flex items-center gap-3">
+                <button id="theme-light" class="theme-option flex items-center gap-2 px-4 py-2 border border-modal-border rounded-lg hover:bg-dropdown-hover transition-colors" data-theme="light">
+                  <span class="material-symbols-outlined text-text-primary">light_mode</span>
+                  <span class="font-medium text-text-primary">Light</span>
+                  <span class="material-symbols-outlined text-accent-blue hidden theme-check">check_circle</span>
+                </button>
+                <button id="theme-dark" class="theme-option flex items-center gap-2 px-4 py-2 border border-modal-border rounded-lg hover:bg-dropdown-hover transition-colors" data-theme="dark">
+                  <span class="material-symbols-outlined text-text-primary">dark_mode</span>
+                  <span class="font-medium text-text-primary">Dark</span>
+                  <span class="material-symbols-outlined text-accent-blue hidden theme-check">check_circle</span>
+                </button>
+                <button id="theme-system" class="theme-option flex items-center gap-2 px-4 py-2 border border-modal-border rounded-lg hover:bg-dropdown-hover transition-colors" data-theme="system">
+                  <span class="material-symbols-outlined text-text-primary">contrast</span>
+                  <span class="font-medium text-text-primary">System</span>
+                  <span class="material-symbols-outlined text-accent-blue hidden theme-check">check_circle</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Paper Trading Wallet Section -->
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden">
-          <div class="p-5 border-b border-outline-variant bg-surface-bright flex items-center gap-3">
-            <span class="material-symbols-outlined text-primary">account_balance_wallet</span>
-            <h3 class="font-bold text-lg text-primary">Paper Trading Wallet</h3>
+        <div class="bg-modal-bg border border-modal-border rounded-xl shadow-panel overflow-hidden">
+          <div class="p-5 border-b border-modal-border bg-bg-tertiary flex items-center gap-3">
+            <span class="material-symbols-outlined text-accent-blue">account_balance_wallet</span>
+            <h3 class="font-bold text-lg text-text-primary">Paper Trading Wallet</h3>
           </div>
           <div class="p-6 space-y-6">
             <!-- Balance Display -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div class="bg-surface rounded-lg p-4 border border-outline-variant">
-                <div class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Cash Balance</div>
-                <div id="settings-cash-balance" class="text-2xl font-bold text-primary font-data-mono">₹1,00,000.00</div>
+              <div class="bg-bg-tertiary rounded-lg p-4 border border-modal-border">
+                <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Cash Balance</div>
+                <div id="settings-cash-balance" class="text-2xl font-bold text-text-primary font-mono">₹1,00,000.00</div>
               </div>
-              <div class="bg-surface rounded-lg p-4 border border-outline-variant">
-                <div class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Starting Balance</div>
-                <div id="settings-starting-balance" class="text-2xl font-bold text-on-surface-variant font-data-mono">₹1,00,000.00</div>
+              <div class="bg-bg-tertiary rounded-lg p-4 border border-modal-border">
+                <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Starting Balance</div>
+                <div id="settings-starting-balance" class="text-2xl font-bold text-text-secondary font-mono">₹1,00,000.00</div>
               </div>
-              <div class="bg-surface rounded-lg p-4 border border-outline-variant">
-                <div class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Total P&L</div>
-                <div id="settings-total-pnl" class="text-2xl font-bold text-emerald-600 font-data-mono">₹0.00</div>
+              <div class="bg-bg-tertiary rounded-lg p-4 border border-modal-border">
+                <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Total P&L</div>
+                <div id="settings-total-pnl" class="text-2xl font-bold text-bullish font-mono">₹0.00</div>
               </div>
             </div>
             <!-- Add Funds -->
-            <div class="border-t border-outline-variant pt-5">
-              <h4 class="font-semibold text-sm text-primary mb-3">Add Funds to Wallet</h4>
+            <div class="border-t border-modal-border pt-5">
+              <h4 class="font-semibold text-sm text-text-primary mb-3">Add Funds to Wallet</h4>
               <div class="flex gap-3 items-end">
                 <div class="flex-1">
-                  <label class="block text-xs font-semibold text-secondary uppercase mb-1">Amount (₹)</label>
-                  <input id="topup-amount-input" type="number" min="1000" step="1000" value="100000" class="w-full bg-surface border border-outline-variant rounded-lg px-4 py-2.5 font-data-mono text-lg focus:border-primary focus:ring-0">
+                  <label class="block text-xs font-semibold text-text-muted uppercase mb-1">Amount (₹)</label>
+                  <input id="topup-amount-input" type="number" min="1000" step="1000" value="100000" class="w-full bg-input-bg border border-input-border rounded-lg px-4 py-2.5 font-mono text-lg focus:border-input-focus focus:ring-0">
                 </div>
-                <button id="btn-topup-wallet" class="bg-primary text-white px-6 py-2.5 rounded-lg font-label-sm font-bold hover:bg-primary/90 transition-colors flex items-center gap-2 h-[46px]">
+                <button id="btn-topup-wallet" class="btn-primary flex items-center gap-2 h-[46px]">
                   <span class="material-symbols-outlined text-sm">add</span> Add Funds
                 </button>
               </div>
               <div class="flex gap-2 mt-3">
-                <button class="quick-topup-btn border border-outline-variant px-3 py-1.5 rounded-lg text-xs font-data-mono hover:bg-surface-container-high transition-colors" data-amount="50000">₹50K</button>
-                <button class="quick-topup-btn border border-outline-variant px-3 py-1.5 rounded-lg text-xs font-data-mono hover:bg-surface-container-high transition-colors" data-amount="100000">₹1L</button>
-                <button class="quick-topup-btn border border-outline-variant px-3 py-1.5 rounded-lg text-xs font-data-mono hover:bg-surface-container-high transition-colors" data-amount="500000">₹5L</button>
-                <button class="quick-topup-btn border border-outline-variant px-3 py-1.5 rounded-lg text-xs font-data-mono hover:bg-surface-container-high transition-colors" data-amount="1000000">₹10L</button>
+                <button class="quick-topup-btn border border-input-border px-3 py-1.5 rounded-lg text-xs font-mono hover:bg-dropdown-hover transition-colors" data-amount="50000">₹50K</button>
+                <button class="quick-topup-btn border border-input-border px-3 py-1.5 rounded-lg text-xs font-mono hover:bg-dropdown-hover transition-colors" data-amount="100000">₹1L</button>
+                <button class="quick-topup-btn border border-input-border px-3 py-1.5 rounded-lg text-xs font-mono hover:bg-dropdown-hover transition-colors" data-amount="500000">₹5L</button>
+                <button class="quick-topup-btn border border-input-border px-3 py-1.5 rounded-lg text-xs font-mono hover:bg-dropdown-hover transition-colors" data-amount="1000000">₹10L</button>
               </div>
             </div>
             <!-- Reset Wallet -->
-            <div class="border-t border-outline-variant pt-5">
-              <h4 class="font-semibold text-sm text-primary mb-3">Reset Wallet</h4>
-              <p class="text-xs text-on-surface-variant mb-3">This will clear all holdings, order history, and reset your cash balance to ₹1,00,000.</p>
-              <button id="btn-reset-wallet" class="border border-rose-300 text-rose-600 px-4 py-2 rounded-lg font-label-sm hover:bg-rose-50 transition-colors flex items-center gap-2">
+            <div class="border-t border-modal-border pt-5">
+              <h4 class="font-semibold text-sm text-text-primary mb-3">Reset Wallet</h4>
+              <p class="text-xs text-text-muted mb-3">This will clear all holdings, order history, and reset your cash balance to ₹1,00,000.</p>
+              <button id="btn-reset-wallet" class="border border-bearish text-bearish px-4 py-2 rounded-lg font-label-sm hover:bg-bearish/10 transition-colors flex items-center gap-2">
                 <span class="material-symbols-outlined text-sm">restart_alt</span> Reset Paper Trading
               </button>
             </div>
@@ -979,40 +2119,40 @@
         </div>
 
         <!-- General Preferences -->
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden">
-          <div class="p-5 border-b border-outline-variant bg-surface-bright flex items-center gap-3">
-            <span class="material-symbols-outlined text-primary">tune</span>
-            <h3 class="font-bold text-lg text-primary">General Preferences</h3>
+        <div class="bg-modal-bg border border-modal-border rounded-xl shadow-panel overflow-hidden">
+          <div class="p-5 border-b border-modal-border bg-bg-tertiary flex items-center gap-3">
+            <span class="material-symbols-outlined text-accent-blue">tune</span>
+            <h3 class="font-bold text-lg text-text-primary">General Preferences</h3>
           </div>
           <div class="p-6 space-y-4">
-            <div class="flex items-center justify-between py-3 border-b border-outline-variant">
+            <div class="flex items-center justify-between py-3 border-b border-modal-border">
               <div>
-                <div class="font-semibold text-sm text-primary">Default Market</div>
-                <div class="text-xs text-on-surface-variant">Preferred exchange for symbol search</div>
+                <div class="font-semibold text-sm text-text-primary">Default Market</div>
+                <div class="text-xs text-text-muted">Preferred exchange for symbol search</div>
               </div>
-              <select id="settings-default-market" class="bg-surface-container-lowest border border-outline-variant rounded-md px-3 py-2 font-body-md text-sm focus:border-primary focus:ring-0">
+              <select id="settings-default-market" class="input-field input-field-sm">
                 <option value="NSE" selected>NSE (National Stock Exchange)</option>
                 <option value="BSE">BSE (Bombay Stock Exchange)</option>
                 <option value="NASDAQ">NASDAQ</option>
                 <option value="NYSE">NYSE</option>
               </select>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-outline-variant">
+            <div class="flex items-center justify-between py-3 border-b border-modal-border">
               <div>
-                <div class="font-semibold text-sm text-primary">Currency Display</div>
-                <div class="text-xs text-on-surface-variant">Preferred currency symbol</div>
+                <div class="font-semibold text-sm text-text-primary">Currency Display</div>
+                <div class="text-xs text-text-muted">Preferred currency symbol</div>
               </div>
-              <select id="settings-currency" class="bg-surface-container-lowest border border-outline-variant rounded-md px-3 py-2 font-body-md text-sm focus:border-primary focus:ring-0">
+              <select id="settings-currency" class="input-field input-field-sm">
                 <option value="INR" selected>₹ INR</option>
                 <option value="USD">$ USD</option>
               </select>
             </div>
             <div class="flex items-center justify-between py-3">
               <div>
-                <div class="font-semibold text-sm text-primary">Default Chart Timeframe</div>
-                <div class="text-xs text-on-surface-variant">Applied when loading a new symbol</div>
+                <div class="font-semibold text-sm text-text-primary">Default Chart Timeframe</div>
+                <div class="text-xs text-text-muted">Applied when loading a new symbol</div>
               </div>
-              <select id="settings-default-tf" class="bg-surface-container-lowest border border-outline-variant rounded-md px-3 py-2 font-body-md text-sm focus:border-primary focus:ring-0">
+              <select id="settings-default-tf" class="input-field input-field-sm">
                 <option value="1m">1 Minute</option>
                 <option value="5m">5 Minutes</option>
                 <option value="15m" selected>15 Minutes</option>
@@ -1022,95 +2162,193 @@
             </div>
           </div>
         </div>
+
+        <!-- Chart Preferences -->
+        <div class="bg-modal-bg border border-modal-border rounded-xl shadow-panel overflow-hidden">
+          <div class="p-5 border-b border-modal-border bg-bg-tertiary flex items-center gap-3">
+            <span class="material-symbols-outlined text-accent-blue">query_stats</span>
+            <h3 class="font-bold text-lg text-text-primary">Chart Preferences</h3>
+          </div>
+          <div class="p-6 space-y-4">
+            <div class="flex items-center justify-between py-3 border-b border-modal-border">
+              <div>
+                <div class="font-semibold text-sm text-text-primary">Show Volume by Default</div>
+                <div class="text-xs text-text-muted">Display volume bars on chart load</div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input id="settings-show-volume" type="checkbox" class="sr-only peer" checked>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-accent-blue"></div>
+              </label>
+            </div>
+            <div class="flex items-center justify-between py-3 border-b border-modal-border">
+              <div>
+                <div class="font-semibold text-sm text-text-primary">Show Grid Lines</div>
+                <div class="text-xs text-text-muted">Display chart grid lines</div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input id="settings-show-grid" type="checkbox" class="sr-only peer" checked>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-accent-blue"></div>
+              </label>
+            </div>
+            <div class="flex items-center justify-between py-3 border-b border-modal-border">
+              <div>
+                <div class="font-semibold text-sm text-text-primary">Auto-Scale Price Axis</div>
+                <div class="text-xs text-text-muted">Automatically fit price range</div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input id="settings-auto-scale" type="checkbox" class="sr-only peer" checked>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-accent-blue"></div>
+              </label>
+            </div>
+            <div class="flex items-center justify-between py-3">
+              <div>
+                <div class="font-semibold text-sm text-text-primary">Crosshair Tooltip</div>
+                <div class="text-xs text-text-muted">Show OHLC values on hover</div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input id="settings-crosshair" type="checkbox" class="sr-only peer" checked>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-accent-blue"></div>
+              </label>
+            </div>
+          </div>
+        </div>
       </section>
 
     </main>
   </div>
 
-  <!-- INDICATORS MODAL -->
-  <div id="indicators-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white border border-outline-variant rounded-xl w-full max-w-lg shadow-2xl">
-      <div class="flex justify-between items-center border-b border-outline-variant p-5">
-        <h3 class="font-bold text-lg text-primary flex items-center gap-2">
-          <span class="material-symbols-outlined">functions</span>
-          Technical Indicators
-        </h3>
-        <button id="close-indicators-modal" class="text-secondary hover:text-primary transition-colors">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </div>
-      <div class="p-5 space-y-3 max-h-[60vh] overflow-y-auto">
-        <!-- SMA -->
-        <div class="flex items-center justify-between p-3 bg-surface rounded-lg border border-outline-variant hover:border-primary transition-colors">
-          <div class="flex items-center gap-3">
-            <div class="w-3 h-3 rounded-full bg-blue-500"></div>
-            <div>
-              <div class="font-semibold text-sm text-primary">SMA (Simple Moving Average)</div>
-              <div class="text-xs text-on-surface-variant">Smoothed trend line over N periods</div>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <input id="sma-period" type="number" value="20" min="2" max="200" class="w-16 bg-surface-container-lowest border border-outline-variant rounded px-2 py-1 font-data-mono text-center text-sm h-8">
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input id="toggle-sma" type="checkbox" class="sr-only peer">
-              <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
-            </label>
-          </div>
+  <!-- INDICATORS MODAL (TradingView-style) -->
+  <div id="indicators-modal" class="fixed inset-0 z-[200] hidden">
+    <!-- Backdrop -->
+    <div id="indicators-modal-backdrop" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+    <!-- Panel -->
+    <div class="absolute inset-4 md:inset-8 lg:inset-y-8 lg:inset-x-[12%] bg-modal-bg border border-modal-border rounded-xl shadow-modal flex flex-col overflow-hidden" style="max-height: calc(100vh - 4rem);">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-5 py-3.5 border-b border-modal-border bg-toolbar-bg shrink-0">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-accent-blue" style="font-size:22px">functions</span>
+          <h3 class="font-bold text-base text-text-primary tracking-tight">Indicators, Metrics & Strategies</h3>
         </div>
-        <!-- EMA -->
-        <div class="flex items-center justify-between p-3 bg-surface rounded-lg border border-outline-variant hover:border-primary transition-colors">
-          <div class="flex items-center gap-3">
-            <div class="w-3 h-3 rounded-full bg-orange-500"></div>
-            <div>
-              <div class="font-semibold text-sm text-primary">EMA (Exponential Moving Average)</div>
-              <div class="text-xs text-on-surface-variant">Weighted recent-price trend line</div>
-            </div>
+        <div class="flex items-center gap-2">
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted" style="font-size:18px">search</span>
+            <input id="indicator-search-input" type="text" placeholder="Search indicators..." class="bg-input-bg border border-input-border rounded-lg pl-9 pr-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-input-focus w-56 font-sans">
           </div>
-          <div class="flex items-center gap-2">
-            <input id="ema-period" type="number" value="20" min="2" max="200" class="w-16 bg-surface-container-lowest border border-outline-variant rounded px-2 py-1 font-data-mono text-center text-sm h-8">
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input id="toggle-ema" type="checkbox" class="sr-only peer">
-              <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-orange-500"></div>
-            </label>
-          </div>
-        </div>
-        <!-- Bollinger Bands -->
-        <div class="flex items-center justify-between p-3 bg-surface rounded-lg border border-outline-variant hover:border-primary transition-colors">
-          <div class="flex items-center gap-3">
-            <div class="w-3 h-3 rounded-full bg-purple-500"></div>
-            <div>
-              <div class="font-semibold text-sm text-primary">Bollinger Bands</div>
-              <div class="text-xs text-on-surface-variant">Volatility bands (20 period, 2σ)</div>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <input id="bb-period" type="number" value="20" min="5" max="100" class="w-16 bg-surface-container-lowest border border-outline-variant rounded px-2 py-1 font-data-mono text-center text-sm h-8">
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input id="toggle-bb" type="checkbox" class="sr-only peer">
-              <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500"></div>
-            </label>
-          </div>
-        </div>
-        <!-- VWAP -->
-        <div class="flex items-center justify-between p-3 bg-surface rounded-lg border border-outline-variant hover:border-primary transition-colors">
-          <div class="flex items-center gap-3">
-            <div class="w-3 h-3 rounded-full bg-cyan-500"></div>
-            <div>
-              <div class="font-semibold text-sm text-primary">VWAP (Volume Weighted Avg Price)</div>
-              <div class="text-xs text-on-surface-variant">Institutional reference price level</div>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input id="toggle-vwap" type="checkbox" class="sr-only peer">
-              <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-500"></div>
-            </label>
-          </div>
+          <button id="close-indicators-modal" class="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-hover transition-colors">
+            <span class="material-symbols-outlined" style="font-size:20px">close</span>
+          </button>
         </div>
       </div>
-      <div class="p-4 border-t border-outline-variant flex justify-between items-center">
-        <button id="btn-reset-indicators" class="text-sm text-secondary hover:text-primary transition-colors font-label-sm">Reset All</button>
-        <button id="btn-apply-indicators" class="bg-primary text-white px-6 py-2 rounded-lg font-label-sm font-bold hover:bg-primary/90 transition-colors">Apply Changes</button>
+      <!-- Body: Sidebar + Content -->
+      <div class="flex flex-1 overflow-hidden">
+        <!-- Left Sidebar Categories -->
+        <div class="w-48 border-r border-modal-border bg-sidebar-bg overflow-y-auto shrink-0 py-2">
+          <button class="indicator-cat-btn active w-full text-left px-4 py-2 text-sm font-medium text-text-primary bg-accent-blue/10 border-l-2 border-accent-blue" data-cat="trending">Trending</button>
+          <button class="indicator-cat-btn w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-sidebar-hover border-l-2 border-transparent" data-cat="moving-averages">Moving Averages</button>
+          <button class="indicator-cat-btn w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-sidebar-hover border-l-2 border-transparent" data-cat="oscillators">Oscillators</button>
+          <button class="indicator-cat-btn w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-sidebar-hover border-l-2 border-transparent" data-cat="volatility">Volatility</button>
+          <button class="indicator-cat-btn w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-sidebar-hover border-l-2 border-transparent" data-cat="volume">Volume</button>
+        </div>
+        <!-- Right Content Area -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-1" id="indicator-items-list">
+          <!-- SMA -->
+          <div class="indicator-item flex items-center justify-between px-4 py-3 rounded-lg hover:bg-bg-hover transition-colors cursor-pointer" data-cats="trending,moving-averages">
+            <div class="flex items-center gap-3">
+              <div class="w-3 h-3 rounded-full" style="background:#388bfd"></div>
+              <div>
+                <div class="font-semibold text-sm text-text-primary">SMA — Simple Moving Average</div>
+                <div class="text-xs text-text-muted mt-0.5">Smoothed trend line over N periods</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <input id="sma-period" type="number" value="20" min="2" max="200" class="input-field input-field-sm w-16 text-center">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input id="toggle-sma" type="checkbox" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#388bfd]"></div>
+              </label>
+            </div>
+          </div>
+          <!-- EMA -->
+          <div class="indicator-item flex items-center justify-between px-4 py-3 rounded-lg hover:bg-bg-hover transition-colors cursor-pointer" data-cats="trending,moving-averages">
+            <div class="flex items-center gap-3">
+              <div class="w-3 h-3 rounded-full" style="background:#f85149"></div>
+              <div>
+                <div class="font-semibold text-sm text-text-primary">EMA — Exponential Moving Average</div>
+                <div class="text-xs text-text-muted mt-0.5">Weighted recent-price trend line</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <input id="ema-period" type="number" value="20" min="2" max="200" class="input-field input-field-sm w-16 text-center">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input id="toggle-ema" type="checkbox" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#f85149]"></div>
+              </label>
+            </div>
+          </div>
+          <!-- Bollinger Bands -->
+          <div class="indicator-item flex items-center justify-between px-4 py-3 rounded-lg hover:bg-bg-hover transition-colors cursor-pointer" data-cats="trending,volatility">
+            <div class="flex items-center gap-3">
+              <div class="w-3 h-3 rounded-full" style="background:#d29922"></div>
+              <div>
+                <div class="font-semibold text-sm text-text-primary">Bollinger Bands</div>
+                <div class="text-xs text-text-muted mt-0.5">Volatility bands (20 period, 2σ)</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <input id="bb-period" type="number" value="20" min="5" max="100" class="input-field input-field-sm w-16 text-center">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input id="toggle-bb" type="checkbox" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#d29922]"></div>
+              </label>
+            </div>
+          </div>
+          <!-- VWAP -->
+          <div class="indicator-item flex items-center justify-between px-4 py-3 rounded-lg hover:bg-bg-hover transition-colors cursor-pointer" data-cats="trending,volume">
+            <div class="flex items-center gap-3">
+              <div class="w-3 h-3 rounded-full" style="background:#8b949e"></div>
+              <div>
+                <div class="font-semibold text-sm text-text-primary">VWAP — Volume Weighted Avg Price</div>
+                <div class="text-xs text-text-muted mt-0.5">Institutional reference price level</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input id="toggle-vwap" type="checkbox" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#8b949e]"></div>
+              </label>
+            </div>
+          </div>
+          <!-- RSI (display only, not functional yet) -->
+          <div class="indicator-item flex items-center justify-between px-4 py-3 rounded-lg hover:bg-bg-hover transition-colors cursor-pointer opacity-50" data-cats="oscillators">
+            <div class="flex items-center gap-3">
+              <div class="w-3 h-3 rounded-full" style="background:#a371f7"></div>
+              <div>
+                <div class="font-semibold text-sm text-text-primary">RSI — Relative Strength Index</div>
+                <div class="text-xs text-text-muted mt-0.5">Momentum oscillator (0–100)</div>
+              </div>
+            </div>
+            <span class="text-xs text-text-muted bg-bg-hover px-2 py-0.5 rounded">Coming Soon</span>
+          </div>
+          <!-- MACD (display only) -->
+          <div class="indicator-item flex items-center justify-between px-4 py-3 rounded-lg hover:bg-bg-hover transition-colors cursor-pointer opacity-50" data-cats="oscillators">
+            <div class="flex items-center gap-3">
+              <div class="w-3 h-3 rounded-full" style="background:#39c5cf"></div>
+              <div>
+                <div class="font-semibold text-sm text-text-primary">MACD — Moving Average Convergence</div>
+                <div class="text-xs text-text-muted mt-0.5">Trend-following momentum indicator</div>
+              </div>
+            </div>
+            <span class="text-xs text-text-muted bg-bg-hover px-2 py-0.5 rounded">Coming Soon</span>
+          </div>
+        </div>
+      </div>
+      <!-- Footer -->
+      <div class="flex items-center justify-between px-5 py-3 border-t border-modal-border bg-toolbar-bg shrink-0">
+        <span class="text-xs text-text-muted">4 indicators available</span>
+        <div class="flex items-center gap-2">
+          <button id="btn-reset-indicators" class="px-4 py-1.5 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-bg-hover border border-border-primary transition-colors">Reset All</button>
+          <button id="btn-apply-indicators" class="px-4 py-1.5 rounded-lg text-sm font-semibold text-white bg-[#4f46e5] hover:bg-[#4338ca] transition-colors">Apply Changes</button>
+        </div>
       </div>
     </div>
   </div>
