@@ -1,0 +1,142 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+@import 'tailwindcss';
+
+:root {
+  --qv-bg: #f7f9fb;
+  --qv-bg2: #eef1f6;
+  --qv-card: #ffffff;
+  --qv-card2: #f4f6fa;
+  --qv-border: #e2e8f0;
+  --qv-border2: #cbd5e1;
+  --qv-text: #0f172a;
+  --qv-text2: #475569;
+  --qv-text3: #94a3b8;
+  --qv-accent: #2563eb;
+  --qv-accent2: #1d4ed8;
+  --qv-bull: #059669;
+  --qv-bear: #e11d48;
+  --qv-bull-bg: #d1fae5;
+  --qv-bear-bg: #ffe4e6;
+  --qv-sidenav: #ffffff;
+  --qv-topbar: #ffffff;
+  --qv-radius: 12px;
+  --qv-radius-sm: 8px;
+  --qv-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+  --qv-shadow-md: 0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+  --qv-shadow-lg: 0 10px 32px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.07);
+}
+
+html.dark {
+  --qv-bg: #090d16;
+  --qv-bg2: #0d1220;
+  --qv-card: #131926;
+  --qv-card2: #161b22;
+  --qv-border: #1f2633;
+  --qv-border2: #30363d;
+  --qv-text: #f0f6fc;
+  --qv-text2: #8b949e;
+  --qv-text3: #6e7681;
+  --qv-accent: #388bfd;
+  --qv-accent2: #58a6ff;
+  --qv-bull: #3fb950;
+  --qv-bear: #f85149;
+  --qv-bull-bg: rgba(63,185,80,0.12);
+  --qv-bear-bg: rgba(248,81,73,0.12);
+  --qv-sidenav: #0f1623;
+  --qv-topbar: #0f1623;
+  --qv-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+  --qv-shadow-md: 0 4px 12px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3);
+  --qv-shadow-lg: 0 10px 32px rgba(0,0,0,0.6), 0 4px 8px rgba(0,0,0,0.4);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  background: var(--qv-bg);
+  color: var(--qv-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-mono, .mono { font-family: 'JetBrains Mono', monospace; }
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  font-feature-settings: 'liga';
+  user-select: none;
+  vertical-align: middle;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--qv-border2); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--qv-text3); }
+
+/* Ambient background for auth page */
+.qv-auth-bg {
+  background: #090d16;
+  position: relative;
+  overflow: hidden;
+}
+.qv-auth-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 30%, rgba(56,139,253,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 70%, rgba(63,185,80,0.08) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 60% at 60% 10%, rgba(139,92,246,0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Terminal ambient */
+.qv-ambient {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 20%, rgba(56,139,253,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 90% 80%, rgba(139,92,246,0.05) 0%, transparent 55%);
+}
+
+/* Pulse animation */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.pulse-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--qv-card) 0%, var(--qv-border) 50%, var(--qv-card) 100%);
+  background-size: 800px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+/* Number formatting */
+.num { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+.bull { color: var(--qv-bull); }
+.bear { color: var(--qv-bear); }
+
+/* Transitions */
+.transition-theme { transition: background 0.2s, color 0.2s, border-color 0.2s; }
