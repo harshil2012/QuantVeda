@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Sign In | QuantVeda AI Trading Terminal</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Google Material Symbols Outlined -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Firebase SDKs (v10 compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            'bg-main': '#090d16',
+            'card-dark': '#0f1422',
+            'card-inner': '#13192a',
+            'border-subtle': '#1f293d',
+            'border-glow': '#2e3d5b',
+            'brand-blue': '#388bfd',
+            'brand-cyan': '#39c5cf',
+            'brand-green': '#3fb950',
+            'brand-red': '#f85149',
+            'brand-purple': '#a371f7',
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Monaco', 'monospace'],
+          },
+          animation: {
+            'glow-pulse': 'glowPulse 4s ease-in-out infinite',
+            'fade-in': 'fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+          },
+          keyframes: {
+            glowPulse: {
+              '0%, 100%': { opacity: 0.35, transform: 'scale(1)' },
+              '50%': { opacity: 0.75, transform: 'scale(1.04)' },
+            },
+            fadeIn: {
+              '0%': { opacity: 0, transform: 'translateY(10px)' },
+              '100%': { opacity: 1, transform: 'translateY(0)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background-color: #090d16;
+      color: #f0f6fc;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+    }
+    
+    /* Cybernetic background grid */
+    .cyber-grid {
+      background-size: 40px 40px;
+      background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    }
+
+    /* Theme-matched ambient mesh (dark trading terminal glow) */
+    .qv-mesh {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(600px 320px at 15% 0%, rgba(56, 139, 253, 0.14), transparent 60%),
+        radial-gradient(700px 380px at 90% 100%, rgba(57, 197, 207, 0.10), transparent 60%),
+        radial-gradient(500px 300px at 85% 10%, rgba(163, 113, 247, 0.08), transparent 60%);
+    }
+
+    /* Google button */
+    .btn-google {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 11px 16px;
+      border-radius: 12px;
+      background: #ffffff;
+      color: #1f2937;
+      font-weight: 700;
+      font-size: 13px;
+      border: 1px solid #e5e7eb;
+      transition: all 0.18s ease;
+      cursor: pointer;
+    }
+    .btn-google:hover { box-shadow: 0 8px 24px rgba(56,139,253,.35); transform: translateY(-1px); }
+    .btn-google:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+    .btn-google svg { width: 18px; height: 18px; flex-shrink: 0; }
+    
+    /* Glass card lighting */
+    .glass-panel {
+      background: radial-gradient(120% 120% at 50% 0%, rgba(20, 27, 45, 0.88) 0%, rgba(12, 16, 26, 0.96) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(56, 139, 253, 0.22);
+      box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.75), 0 0 45px -10px rgba(56, 139, 253, 0.16);
+    }
+
+    /* Individual OTP input styling */
+    .otp-digit-input {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .otp-digit-input:focus {
+      border-color: #388bfd !important;
+      box-shadow: 0 0 16px rgba(56, 139, 253, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #090d16; }
+    ::-webkit-scrollbar-thumb { background: #1f293d; border-radius: 3px; }
+    
+    /* Remove number arrows */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  </style>
+</head>
+<body class="min-h-screen relative flex flex-col justify-between cyber-grid selection:bg-brand-blue/30 selection:text-white">
+
+  <!-- Ambient Glow Orbs -->
+  <div class="qv-mesh"></div>
+  <div class="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-600/10 blur-[130px] pointer-events-none animate-glow-pulse"></div>
+  <div class="fixed bottom-[-10%] right-[-10%] w-[550px] h-[550px] rounded-full bg-cyan-500/10 blur-[140px] pointer-events-none animate-glow-pulse" style="animation-delay: 2s;"></div>
+
+  <!-- Top Global Navigation Bar -->
+  <header class="w-full border-b border-border-subtle/80 bg-bg-main/85 backdrop-blur-md sticky top-0 z-50 px-6 py-3.5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <a href="/" class="flex items-center gap-3 group transition-transform hover:scale-[1.02]">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-blue via-indigo-600 to-brand-cyan p-[1.5px] shadow-lg shadow-blue-500/20">
+          <div class="w-full h-full bg-[#0c101b] rounded-[10px] flex items-center justify-center font-mono font-black text-brand-blue text-lg tracking-wider group-hover:text-white transition-colors">
+            QV
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-lg text-white tracking-tight">QuantVeda</span>
+            <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-brand-blue/15 text-brand-blue border border-brand-blue/30">v2.0</span>
+          </div>
+          <p class="text-[10px] font-mono text-gray-400 tracking-wider uppercase">Vedic Algorithmic Terminal</p>
+        </div>
+      </a>
+    </div>
+
+    <!-- Live Status Indicators & Back to Terminal -->
+    <div class="flex items-center gap-3">
+      <button id="btn-firebase-settings" type="button" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#13192a] border border-border-subtle hover:border-brand-blue/50 text-xs font-mono text-gray-300 hover:text-white transition-all cursor-pointer">
+        <span id="fb-status-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+        <span id="fb-status-text">Firebase Auth</span>
+      </button>
+
+      <div class="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-[#13192a] border border-border-subtle text-xs font-mono">
+        <span class="w-2 h-2 rounded-full bg-brand-green animate-pulse"></span>
+        <span class="text-gray-300">NSE / BSE Live Engine</span>
+      </div>
+
+      <a href="/terminal?guest=1" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-border-subtle bg-[#101625] hover:bg-border-subtle/60 text-xs font-medium text-gray-300 hover:text-white transition-all">
+        <span class="material-symbols-outlined text-sm">candlestick_chart</span>
+        <span>Open Terminal</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Live Market Ticker Ribbon -->
+  <div class="w-full bg-[#0b101c] border-b border-border-subtle/60 py-1.5 px-6 overflow-hidden hidden sm:block">
+    <div class="flex items-center gap-8 text-[11px] font-mono text-gray-400 overflow-x-auto whitespace-nowrap">
+      <div class="flex items-center gap-1.5">
+        <span class="text-gray-500 font-bold uppercase">Market Pulse:</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="text-gray-300 font-semibold">NIFTY 50</span>
+        <span class="text-white">24,852.40</span>
+        <span class="text-brand-green flex items-center font-bold">+182.10 (+0.74%)</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="text-gray-300 font-semibold">BANKNIFTY</span>
+        <span class="text-white">52,194.80</span>
+        <span class="text-brand-green flex items-center font-bold">+412.50 (+0.80%)</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="text-gray-300 font-semibold">RELIANCE</span>
+        <span class="text-white">2,985.00</span>
+        <span class="text-brand-green flex items-center font-bold">+38.20 (+1.30%)</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="text-gray-300 font-semibold">TCS</span>
+        <span class="text-white">4,120.15</span>
+        <span class="text-brand-green flex items-center font-bold">+15.30 (+0.37%)</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="text-gray-300 font-semibold">HDFCBANK</span>
+        <span class="text-white">1,644.50</span>
+        <span class="text-brand-green flex items-center font-bold">+14.25 (+0.87%)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Showcase & Authentication Container -->
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-8 md:py-12 flex flex-col lg:flex-row items-center justify-center gap-10 lg:gap-14">
+    
+    <!-- LEFT COLUMN: Platform Showcase & Value Proposition -->
+    <div class="w-full lg:w-1/2 space-y-8 text-left">
+      
+      <div class="space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-blue/10 border border-brand-blue/30 text-brand-blue text-xs font-mono font-medium">
+          <span class="material-symbols-outlined text-sm">lock_open</span>
+          <span>Passwordless Institutional Gateway</span>
+        </div>
+        
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-[1.15]">
+          Algorithmic Precision.<br>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue via-brand-cyan to-brand-green">
+            Vedic Trading Discipline.
+          </span>
+        </h1>
+        
+        <p class="text-sm sm:text-base text-gray-400 font-normal leading-relaxed max-w-xl">
+          Log in in seconds with real-time OTP sent directly to your Email or Mobile Phone. Zero passwords to remember, 100% bank-grade cryptographic protection.
+        </p>
+      </div>
+
+      <!-- Feature Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl">
+        
+        <div class="p-4 rounded-2xl bg-card-dark/60 border border-border-subtle hover:border-brand-blue/40 transition-all duration-300 group">
+          <div class="w-9 h-9 rounded-xl bg-brand-green/10 text-brand-green flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-xl">account_balance_wallet</span>
+          </div>
+          <h4 class="text-sm font-bold text-white mb-1">&#8377;100,000 Virtual Capital</h4>
+          <p class="text-xs text-gray-400 leading-normal">Every verified user instantly gets a complimentary paper wallet to test strategies risk-free.</p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-card-dark/60 border border-border-subtle hover:border-brand-blue/40 transition-all duration-300 group">
+          <div class="w-9 h-9 rounded-xl bg-brand-blue/10 text-brand-blue flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-xl">insights</span>
+          </div>
+          <h4 class="text-sm font-bold text-white mb-1">AI Sentiment Analysis</h4>
+          <p class="text-xs text-gray-400 leading-normal">Multi-horizon price direction signals powered by Google Gemini &amp; market depth models.</p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-card-dark/60 border border-border-subtle hover:border-brand-blue/40 transition-all duration-300 group">
+          <div class="w-9 h-9 rounded-xl bg-brand-cyan/10 text-brand-cyan flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-xl">flash_on</span>
+          </div>
+          <h4 class="text-sm font-bold text-white mb-1">Ultra-Low Latency</h4>
+          <p class="text-xs text-gray-400 leading-normal">Instant chart updates, real-time tick streaming, and sub-millisecond execution feedback.</p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-card-dark/60 border border-border-subtle hover:border-brand-blue/40 transition-all duration-300 group">
+          <div class="w-9 h-9 rounded-xl bg-brand-purple/10 text-brand-purple flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-xl">shield</span>
+          </div>
+          <h4 class="text-sm font-bold text-white mb-1">Encrypted &amp; Salted</h4>
+          <p class="text-xs text-gray-400 leading-normal">OTPs are SHA-256 salted and expire in 5 minutes with strict rate limiting &amp; attempt quotas.</p>
+        </div>
+
+      </div>
+
+      <!-- Trust Indicator Quote -->
+      <div class="p-4 rounded-2xl bg-gradient-to-r from-blue-950/30 to-indigo-950/20 border border-blue-900/30 flex items-center gap-3.5 max-w-xl">
+        <div class="w-10 h-10 rounded-full bg-blue-600/20 flex-shrink-0 flex items-center justify-center text-brand-blue font-bold font-mono">
+          &#9733;
+        </div>
+        <p class="text-xs text-gray-300 italic">
+          &ldquo;QuantVeda bridges the intuition of Vedic cycles with modern quantitative trading pipelines. Frictionless sign-in lets traders focus on the charts.&rdquo;
+        </p>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN: The Interactive Glassmorphism Auth Card -->
+    <div class="w-full lg:w-1/2 max-w-md">
+      
+      <div class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden animate-fade-in">
+        
+        <!-- Ambient Top Glow Line -->
+        <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-brand-blue to-transparent opacity-80"></div>
+
+        <!-- ==========================================
+             STAGE 1: INPUT IDENTIFIER (Email / Phone)
+             ========================================== -->
+        <div id="auth-card-step1" class="space-y-6">
+          
+          <!-- Card Header -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-mono uppercase tracking-widest text-brand-blue font-semibold flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-brand-blue"></span>
+                Terminal Authentication
+              </span>
+              <span class="text-[10px] font-mono text-gray-400 bg-card-inner px-2 py-0.5 rounded border border-border-subtle">Step 1 of 2</span>
+            </div>
+            <h2 class="text-2xl font-bold text-white tracking-tight">Sign In or Register</h2>
+            <p class="text-xs text-gray-400">New traders are automatically registered with a &#8377;1,00,000 paper balance.</p>
+          </div>
+
+          <!-- Firebase Status Alert Banner (Shown if not yet configured) -->
+          <div id="firebase-config-banner" class="hidden p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs font-mono flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2 text-amber-300">
+              <span class="material-symbols-outlined text-base flex-shrink-0">local_fire_department</span>
+              <span class="leading-tight">Firebase credentials not set in .env. Click to connect.</span>
+            </div>
+            <button id="btn-banner-open-fb" type="button" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 hover:text-white border border-amber-500/40 text-[11px] font-bold flex-shrink-0 cursor-pointer transition-colors">
+              Setup
+            </button>
+          </div>
+
+          <!-- Channel Segmented Tab Control -->
+          <div class="p-1 rounded-xl bg-[#090d16] border border-border-subtle flex gap-1 font-mono text-xs">
+            <button id="tab-email" type="button" class="flex-1 py-2 px-3 rounded-lg font-bold transition-all flex items-center justify-center gap-2 bg-brand-blue text-white shadow-md cursor-pointer">
+              <span class="material-symbols-outlined text-sm">mail</span>
+              <span>Email Auth</span>
+            </button>
+            <button id="tab-phone" type="button" class="flex-1 py-2 px-3 rounded-lg font-medium text-gray-400 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer">
+              <span class="material-symbols-outlined text-sm">smartphone</span>
+              <span>Mobile Phone OTP</span>
+            </button>
+          </div>
+
+          <!-- Form: Email Channel -->
+          <div id="form-email-channel" class="space-y-4">
+            
+            <!-- Email Auth Mode Switcher (Magic Link vs Password vs Register) -->
+            <div class="p-1 rounded-xl bg-[#090d16] border border-border-subtle flex gap-1 font-mono text-xs">
+              <button id="btn-email-mode-magic" type="button" class="flex-1 py-1.5 rounded-lg font-bold text-white bg-card-inner border border-brand-blue/30 shadow-sm transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-xs inline -mt-0.5">link</span> Magic Link
+              </button>
+              <button id="btn-email-mode-login" type="button" class="flex-1 py-1.5 rounded-lg font-medium text-gray-400 hover:text-white transition-all cursor-pointer">
+                Password
+              </button>
+              <button id="btn-email-mode-signup" type="button" class="flex-1 py-1.5 rounded-lg font-medium text-gray-400 hover:text-white transition-all cursor-pointer">
+                Register
+              </button>
+            </div>
+
+            <!-- Email Address Input -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-gray-300 font-sans">Email Address</label>
+              <div class="relative group">
+                <span class="material-symbols-outlined absolute left-3.5 top-3 text-gray-400 text-lg group-focus-within:text-brand-blue transition-colors">alternate_email</span>
+                <input 
+                  id="input-email" 
+                  type="email" 
+                  placeholder="trader@quantveda.com" 
+                  autocomplete="email"
+                  class="w-full bg-[#0c101c] border border-border-subtle focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 rounded-xl pl-11 pr-4 py-2.5 text-sm text-white placeholder:text-gray-500 font-mono outline-none transition-all"
+                >
+              </div>
+            </div>
+
+            <!-- Magic Link Explanatory Hint -->
+            <p id="hint-magic-link" class="text-[11px] font-mono text-gray-400">
+              <span class="text-brand-cyan font-semibold">Passwordless Sign-In:</span> A direct authentication link will be sent to your email inbox.
+            </p>
+
+            <!-- Password Input (Hidden in Magic Link mode) -->
+            <div id="box-password" class="space-y-1.5 hidden">
+              <div class="flex items-center justify-between">
+                <label class="block text-xs font-semibold text-gray-300 font-sans">Password</label>
+                <button id="btn-forgot-password" type="button" class="text-[11px] font-mono text-brand-blue hover:text-cyan-400 hover:underline cursor-pointer">
+                  Forgot Password?
+                </button>
+              </div>
+              <div class="relative group">
+                <span class="material-symbols-outlined absolute left-3.5 top-3 text-gray-400 text-lg group-focus-within:text-brand-blue transition-colors">lock</span>
+                <input 
+                  id="input-password" 
+                  type="password" 
+                  placeholder="••••••••••••" 
+                  autocomplete="current-password"
+                  class="w-full bg-[#0c101c] border border-border-subtle focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 rounded-xl pl-11 pr-11 py-2.5 text-sm text-white placeholder:text-gray-500 font-mono outline-none transition-all"
+                >
+                <button id="btn-toggle-password" type="button" class="absolute right-3.5 top-2.5 text-gray-400 hover:text-white cursor-pointer transition-colors" title="Toggle password visibility">
+                  <span id="icon-toggle-password" class="material-symbols-outlined text-lg">visibility</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Domain Suggestion Chips -->
+            <div class="flex items-center gap-1.5 pt-0.5">
+              <span class="text-[10px] text-gray-500 font-mono">Quick Fill:</span>
+              <button type="button" class="chip-domain text-[10px] font-mono px-2 py-0.5 rounded bg-card-inner border border-border-subtle text-gray-400 hover:text-brand-blue hover:border-brand-blue/40 transition-colors" data-domain="@gmail.com">@gmail.com</button>
+              <button type="button" class="chip-domain text-[10px] font-mono px-2 py-0.5 rounded bg-card-inner border border-border-subtle text-gray-400 hover:text-brand-blue hover:border-brand-blue/40 transition-colors" data-domain="@yahoo.com">@yahoo.com</button>
+              <button type="button" class="chip-domain text-[10px] font-mono px-2 py-0.5 rounded bg-card-inner border border-border-subtle text-gray-400 hover:text-brand-blue hover:border-brand-blue/40 transition-colors" data-domain="@outlook.com">@outlook.com</button>
+            </div>
+          </div>
+
+          <!-- Form: Phone Channel -->
+          <div id="form-phone-channel" class="space-y-3 hidden">
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-gray-300 font-sans">Mobile Phone Number</label>
+              <div class="flex gap-2">
+                <!-- Country dial selector -->
+                <div class="relative w-28 flex-shrink-0">
+                  <select 
+                    id="select-country-code" 
+                    class="w-full bg-[#0c101c] border border-border-subtle focus:border-brand-blue rounded-xl py-2.5 px-2.5 text-xs text-white font-mono font-bold outline-none cursor-pointer appearance-none text-center"
+                  >
+                    <option value="+91" selected>&#127470;&#127475; +91 (IN)</option>
+                    <option value="+1">&#127482;&#127488; +1 (US)</option>
+                    <option value="+44">&#127468;&#127463; +44 (UK)</option>
+                    <option value="+971">&#127462;&#127466; +971 (AE)</option>
+                    <option value="+65">&#127488;&#127468; +65 (SG)</option>
+                    <option value="+61">&#127462;&#127482; +61 (AU)</option>
+                    <option value="+49">&#127465;&#127466; +49 (DE)</option>
+                    <option value="+1">&#127464;&#127462; +1 (CA)</option>
+                  </select>
+                </div>
+                <!-- Number Input -->
+                <div class="relative flex-1 group">
+                  <span class="material-symbols-outlined absolute left-3 top-3 text-gray-400 text-lg group-focus-within:text-brand-blue transition-colors">call</span>
+                  <input 
+                    id="input-phone" 
+                    type="tel" 
+                    placeholder="98765 43210" 
+                    autocomplete="tel"
+                    class="w-full bg-[#0c101c] border border-border-subtle focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 rounded-xl pl-10 pr-3 py-2.5 text-sm text-white placeholder:text-gray-500 font-mono outline-none transition-all"
+                  >
+                </div>
+              </div>
+              <p class="text-[11px] font-mono text-gray-500">Real SMS OTP will be dispatched to your mobile number via Firebase.</p>
+            </div>
+            <!-- Invisible reCAPTCHA Container -->
+            <div id="recaptcha-container"></div>
+          </div>
+
+          <!-- Alert / Error display box -->
+          <div id="auth-status-alert" class="hidden p-3 rounded-xl text-xs font-mono border"></div>
+
+          <!-- Primary Submit Button -->
+          <button
+            id="btn-submit-identifier"
+            type="button"
+            class="w-full py-3 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:via-indigo-500 hover:to-cyan-400 shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
+          >
+            <span id="btn-submit-icon" class="material-symbols-outlined text-lg">login</span>
+            <span id="btn-submit-text">Sign In with Email</span>
+          </button>
+
+          <!-- Divider -->
+          <div class="flex items-center gap-3 pt-1">
+            <div class="flex-1 h-px bg-border-subtle"></div>
+            <span class="text-[11px] font-mono text-gray-500">or continue with</span>
+            <div class="flex-1 h-px bg-border-subtle"></div>
+          </div>
+
+          <!-- Google Sign-In -->
+          <button id="btn-google-signin" type="button" class="btn-google">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.9-.1-1.5-.3-2.3H12v4.5h6.5c-.1 1.1-.8 2.7-2.4 3.8l-.1.1 3.5 2.7.2.1c2.2-2 3.8-5 3.8-8.9z"/><path fill="#34A853" d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.8-2.9c-1 .7-2.4 1.2-4.1 1.2-3.1 0-5.8-2.1-6.8-5l-.1.1-3.6 2.8v.1C3.5 21.4 7.5 24 12 24z"/><path fill="#FBBC05" d="M5.2 14.4c-.2-.7-.4-1.5-.4-2.4s.1-1.7.4-2.4l-.1-.1-3.6-2.8-.1.1C.5 8.7 0 10.2 0 12s.5 3.3 1.4 4.7l3.8-2.3z"/><path fill="#EA4335" d="M12 4.7c1.8 0 3 .8 3.7 1.4l3.3-3.2C17.9 1.1 15.2 0 12 0 7.5 0 3.5 2.6 1.4 6.7l3.8 2.9c1-2.9 3.7-4.9 6.8-4.9z"/></svg>
+            <span id="btn-google-text">Continue with Google</span>
+          </button>
+
+          <!-- Security note -->
+          <div class="text-center text-[11px] text-gray-500 font-mono flex items-center justify-center gap-1.5">
+            <span class="material-symbols-outlined text-xs text-brand-green">verified</span>
+            <span>By proceeding, you agree to QuantVeda Trading Rules</span>
+          </div>
+
+          <!-- Explore as Guest Link -->
+          <div class="pt-2 border-t border-border-subtle/50 text-center">
+            <a href="/terminal?guest=1" class="text-xs text-gray-400 hover:text-brand-blue font-mono inline-flex items-center gap-1 transition-colors">
+              <span>Looking around first?</span>
+              <span class="font-bold underline">Explore Terminal as Guest &rarr;</span>
+            </a>
+          </div>
+
+        </div>
+
+        <!-- ==========================================
+             STAGE 2: OTP CODE VERIFICATION
+             ========================================== -->
+        <div id="auth-card-step2" class="space-y-6 hidden">
+          
+          <!-- Step 2 Header -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-mono uppercase tracking-widest text-brand-green font-semibold flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-brand-green animate-ping"></span>
+                Code Dispatched
+              </span>
+              <span class="text-[10px] font-mono text-gray-400 bg-card-inner px-2 py-0.5 rounded border border-border-subtle">Step 2 of 2</span>
+            </div>
+            <h2 class="text-2xl font-bold text-white tracking-tight">Enter Security Code</h2>
+            <p class="text-xs text-gray-400">A 6-digit authentication token has been generated.</p>
+          </div>
+
+          <!-- Recipient Badge & Edit Button -->
+          <div class="p-3 rounded-xl bg-card-inner border border-border-subtle flex items-center justify-between text-xs font-mono">
+            <div class="flex items-center gap-2.5 overflow-hidden">
+              <div class="w-7 h-7 rounded-lg bg-brand-blue/15 text-brand-blue flex items-center justify-center flex-shrink-0">
+                <span id="auth-sent-icon" class="material-symbols-outlined text-base">mail</span>
+              </div>
+              <div class="truncate">
+                <div class="text-[10px] text-gray-500">Dispatched to</div>
+                <div id="auth-sent-target" class="font-bold text-white truncate">trader@quantveda.com</div>
+              </div>
+            </div>
+            <button id="btn-edit-target" type="button" class="text-brand-blue hover:text-cyan-400 text-xs font-semibold px-2 py-1 rounded hover:bg-brand-blue/10 transition-colors cursor-pointer flex-shrink-0">
+              Change
+            </button>
+          </div>
+
+          <!-- 6-Digit Individual OTP Inputs -->
+          <div class="space-y-3">
+            <label class="block text-xs font-semibold text-center text-gray-300 font-sans">Enter 6-Digit Verification Code</label>
+            
+            <div id="otp-inputs-container" class="flex items-center justify-center gap-2 sm:gap-2.5">
+              <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="otp-digit-input w-10 sm:w-12 h-12 sm:h-14 text-center text-xl sm:text-2xl font-mono font-bold bg-[#0c101c] border border-border-subtle rounded-xl text-white outline-none" data-idx="0" autofocus>
+              <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="otp-digit-input w-10 sm:w-12 h-12 sm:h-14 text-center text-xl sm:text-2xl font-mono font-bold bg-[#0c101c] border border-border-subtle rounded-xl text-white outline-none" data-idx="1">
+              <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="otp-digit-input w-10 sm:w-12 h-12 sm:h-14 text-center text-xl sm:text-2xl font-mono font-bold bg-[#0c101c] border border-border-subtle rounded-xl text-white outline-none" data-idx="2">
+              <span class="text-gray-600 font-bold font-mono">-</span>
+              <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="otp-digit-input w-10 sm:w-12 h-12 sm:h-14 text-center text-xl sm:text-2xl font-mono font-bold bg-[#0c101c] border border-border-subtle rounded-xl text-white outline-none" data-idx="3">
+              <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="otp-digit-input w-10 sm:w-12 h-12 sm:h-14 text-center text-xl sm:text-2xl font-mono font-bold bg-[#0c101c] border border-border-subtle rounded-xl text-white outline-none" data-idx="4">
+              <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="otp-digit-input w-10 sm:w-12 h-12 sm:h-14 text-center text-xl sm:text-2xl font-mono font-bold bg-[#0c101c] border border-border-subtle rounded-xl text-white outline-none" data-idx="5">
+            </div>
+          </div>
+
+          <!-- Alert / Error display for OTP step -->
+          <div id="otp-status-alert" class="hidden p-3 rounded-xl text-xs font-mono border"></div>
+
+          <!-- Verify OTP Button -->
+          <button 
+            id="btn-verify-code" 
+            type="button"
+            class="w-full py-3 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
+          >
+            <span class="material-symbols-outlined text-lg">check_circle</span>
+            <span id="btn-verify-text">Verify &amp; Launch Terminal</span>
+          </button>
+
+          <!-- Resend Countdown Timer -->
+          <div class="text-center text-xs font-mono text-gray-400 flex items-center justify-center gap-2">
+            <span id="timer-label">Resend code in:</span>
+            <span id="timer-display" class="font-bold text-brand-blue">0:60</span>
+            <button id="btn-resend-code" type="button" class="hidden text-brand-blue hover:text-cyan-400 font-bold hover:underline cursor-pointer">
+              Resend Code Now
+            </button>
+          </div>
+
+        </div>
+
+        <!-- ==========================================
+             STAGE 3: VERIFICATION SUCCESS SCREEN
+             ========================================== -->
+        <div id="auth-card-step3" class="space-y-6 text-center hidden py-4 animate-fade-in">
+          
+          <div class="w-16 h-16 rounded-2xl bg-brand-green/20 border-2 border-brand-green/40 text-brand-green flex items-center justify-center mx-auto shadow-xl shadow-green-500/20">
+            <span class="material-symbols-outlined text-3xl animate-bounce">check</span>
+          </div>
+
+          <div class="space-y-2">
+            <h3 class="text-2xl font-bold text-white tracking-tight">Access Authorized</h3>
+            <p id="success-welcome-msg" class="text-sm text-gray-300">Welcome to QuantVeda Terminal!</p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-card-inner border border-border-subtle text-left space-y-2">
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-gray-400">Trader Identifier:</span>
+              <span id="success-user-id" class="font-bold text-white">user</span>
+            </div>
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-gray-400">Paper Wallet Balance:</span>
+              <span id="success-wallet-balance" class="font-bold text-brand-green">&#8377;100,000.00</span>
+            </div>
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-gray-400">Session Lifetime:</span>
+              <span class="text-blue-400 font-semibold">7 Days (Signed JWT)</span>
+            </div>
+          </div>
+
+          <!-- Launch Progress Bar -->
+          <div class="space-y-2 pt-2">
+            <div class="w-full bg-[#090d16] rounded-full h-2 overflow-hidden border border-border-subtle">
+              <div id="redirect-progress" class="bg-gradient-to-r from-brand-blue to-brand-green h-full w-0 transition-all duration-1000 ease-out"></div>
+            </div>
+            <p class="text-xs text-gray-400 font-mono">Launching terminal workspace in <span id="redirect-seconds">2</span>s...</p>
+          </div>
+
+          <a href="/terminal" class="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-border-subtle bg-card-inner hover:bg-border-subtle/50 text-xs font-bold text-white font-mono transition-colors">
+            <span>Enter Terminal Now</span>
+            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+          </a>
+
+        </div>
+
+      </div>
+
+      <!-- Bottom Card Trust Badges -->
+      <div class="mt-6 flex items-center justify-around text-[11px] font-mono text-gray-500">
+        <div class="flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm text-gray-400">lock</span>
+          <span>256-Bit SSL</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm text-gray-400">database</span>
+          <span>Zero Plaintext Keys</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm text-gray-400">bolt</span>
+          <span>Instant Session</span>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="w-full border-t border-border-subtle/60 py-4 px-6 text-center text-xs text-gray-500 font-mono flex flex-col sm:flex-row items-center justify-between gap-2">
+    <div>&copy; 2026 QuantVeda AI. All rights reserved. SEBI Compliant Simulation Engine.</div>
+    <div class="flex items-center gap-4">
+      <a href="/terminal" class="hover:text-brand-blue transition-colors">Terminal</a>
+      <span class="text-gray-700">&bull;</span>
+      <a href="/docs" class="hover:text-brand-blue transition-colors">API Docs</a>
+      <span class="text-gray-700">&bull;</span>
+      <span class="text-gray-400">Server: Online (Port 8000)</span>
+    </div>
+  </footer>
+
+  <!-- Modal: Firebase Setup & Credentials -->
+  <div id="modal-firebase-setup" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="glass-panel max-w-lg w-full rounded-3xl p-6 border border-border-glow shadow-2xl relative animate-fade-in max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-4 border-b border-border-subtle">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center">
+            <span class="material-symbols-outlined text-lg">local_fire_department</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Firebase Authentication Setup</h3>
+            <p class="text-[11px] font-mono text-gray-400">Live Email &amp; Phone SMS Gateway</p>
+          </div>
+        </div>
+        <button id="btn-close-fb-modal" type="button" class="w-8 h-8 rounded-lg bg-card-inner hover:bg-border-subtle flex items-center justify-center text-gray-400 hover:text-white transition-colors cursor-pointer">
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <div class="py-4 space-y-4 text-xs font-mono">
+        <div class="p-3 rounded-xl bg-[#090d16] border border-border-subtle text-gray-300 space-y-1.5 font-sans leading-relaxed">
+          <div class="font-bold text-white flex items-center gap-1.5 font-mono text-xs">
+            <span class="material-symbols-outlined text-sm text-brand-green">check_circle</span>
+            <span>Quick Setup in 3 steps:</span>
+          </div>
+          <ol class="list-decimal list-inside text-gray-400 space-y-1 text-xs">
+            <li>Go to <a href="https://console.firebase.google.com/" target="_blank" class="text-brand-blue underline">Firebase Console</a> &rarr; create/open project.</li>
+            <li>In <strong>Authentication</strong> &rarr; <strong>Sign-in method</strong>, enable <strong>Email/Password</strong> and <strong>Phone</strong>.</li>
+            <li>In <strong>Project settings</strong> &rarr; General, register a Web App and paste config below:</li>
+          </ol>
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="block text-gray-300 font-bold">Paste Entire firebaseConfig Object or JSON:</label>
+          <textarea id="fb-config-paste-box" rows="4" placeholder='const firebaseConfig = {
+  apiKey: "AIzaSy...",
+  authDomain: "your-app.firebaseapp.com",
+  projectId: "your-app",
+  storageBucket: "your-app.appspot.com",
+  messagingSenderId: "...",
+  appId: "..."
+};' class="w-full bg-[#090d16] border border-border-subtle focus:border-brand-blue rounded-xl p-3 text-xs text-brand-cyan placeholder:text-gray-600 font-mono outline-none"></textarea>
+          <div class="text-right">
+            <button id="btn-parse-fb-paste" type="button" class="text-[11px] font-mono text-brand-blue hover:text-cyan-400 cursor-pointer">
+              &darr; Auto-fill fields below from paste
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] text-gray-400 mb-1">API Key (apiKey)</label>
+            <input id="fb-inp-api-key" type="text" placeholder="AIzaSy..." class="w-full bg-[#090d16] border border-border-subtle rounded-lg px-2.5 py-1.5 text-xs text-white font-mono outline-none focus:border-brand-blue">
+          </div>
+          <div>
+            <label class="block text-[11px] text-gray-400 mb-1">Auth Domain (authDomain)</label>
+            <input id="fb-inp-auth-domain" type="text" placeholder="app.firebaseapp.com" class="w-full bg-[#090d16] border border-border-subtle rounded-lg px-2.5 py-1.5 text-xs text-white font-mono outline-none focus:border-brand-blue">
+          </div>
+          <div>
+            <label class="block text-[11px] text-gray-400 mb-1">Project ID (projectId)</label>
+            <input id="fb-inp-project-id" type="text" placeholder="my-trading-app" class="w-full bg-[#090d16] border border-border-subtle rounded-lg px-2.5 py-1.5 text-xs text-white font-mono outline-none focus:border-brand-blue">
+          </div>
+          <div>
+            <label class="block text-[11px] text-gray-400 mb-1">App ID (appId)</label>
+            <input id="fb-inp-app-id" type="text" placeholder="1:123456:web:abcd" class="w-full bg-[#090d16] border border-border-subtle rounded-lg px-2.5 py-1.5 text-xs text-white font-mono outline-none focus:border-brand-blue">
+          </div>
+          <div>
+            <label class="block text-[11px] text-gray-400 mb-1">Storage Bucket</label>
+            <input id="fb-inp-storage-bucket" type="text" placeholder="app.appspot.com" class="w-full bg-[#090d16] border border-border-subtle rounded-lg px-2.5 py-1.5 text-xs text-white font-mono outline-none focus:border-brand-blue">
+          </div>
+          <div>
+            <label class="block text-[11px] text-gray-400 mb-1">Messaging Sender ID</label>
+            <input id="fb-inp-sender-id" type="text" placeholder="123456789" class="w-full bg-[#090d16] border border-border-subtle rounded-lg px-2.5 py-1.5 text-xs text-white font-mono outline-none focus:border-brand-blue">
+          </div>
+        </div>
+
+        <div id="fb-save-alert" class="hidden p-2.5 rounded-xl border text-xs font-mono"></div>
+
+        <div class="pt-2 flex items-center justify-between gap-3">
+          <button id="btn-save-fb-config" type="button" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-bold text-xs shadow-lg shadow-amber-500/20 transition-all cursor-pointer">
+            Save &amp; Connect Firebase
+          </button>
+          <button id="btn-cancel-fb-config" type="button" class="px-4 py-2.5 rounded-xl bg-card-inner border border-border-subtle text-gray-400 hover:text-white text-xs cursor-pointer transition-colors">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Client-Side Auth Controller -->
+  <script>
+    (function() {
+      // Auto-check active session: if already logged in, redirect directly to terminal
+      const existingToken = localStorage.getItem('quantveda_auth_token') || localStorage.getItem('quantveda_token');
+      const urlQuery = new URLSearchParams(window.location.search);
+      const isManualAuth = urlQuery.has('logout') || urlQuery.has('switch');
+
+      if (existingToken && !isManualAuth) {
+        fetch('/api/auth/me', {
+          headers: { 'Authorization': 'Bearer ' + existingToken }
+        }).then(r => r.json()).then(data => {
+          if (data && data.status === 'success' && data.user) {
+            const targetUrl = urlQuery.get('redirect') || '/terminal';
+            window.location.replace(targetUrl);
+          }
+        }).catch(() => {});
+      }
+
+      // State variables
+      let activeChannel = 'email';       // 'email' or 'phone'
+      let emailMode = 'magic';           // 'magic', 'login', or 'signup'
+      let currentIdentifier = '';
+      let timerInterval = null;
+      let countdownRemaining = 60;
+      let isFirebaseReady = false;
+      let activeFirebaseConfig = null;
+
+      // Elements - Global
+      const fbStatusDot = document.getElementById('fb-status-dot');
+      const fbStatusText = document.getElementById('fb-status-text');
+      const btnFirebaseSettings = document.getElementById('btn-firebase-settings');
+      const btnBannerOpenFb = document.getElementById('btn-banner-open-fb');
+      const firebaseConfigBanner = document.getElementById('firebase-config-banner');
+
+      // Elements - Channel Tabs & Forms
+      const tabEmail = document.getElementById('tab-email');
+      const tabPhone = document.getElementById('tab-phone');
+      const formEmail = document.getElementById('form-email-channel');
+      const formPhone = document.getElementById('form-phone-channel');
+      const inputEmail = document.getElementById('input-email');
+      const boxPassword = document.getElementById('box-password');
+      const hintMagicLink = document.getElementById('hint-magic-link');
+      const inputPassword = document.getElementById('input-password');
+      const btnTogglePassword = document.getElementById('btn-toggle-password');
+      const iconTogglePassword = document.getElementById('icon-toggle-password');
+      const btnForgotPassword = document.getElementById('btn-forgot-password');
+      const btnEmailModeMagic = document.getElementById('btn-email-mode-magic');
+      const btnEmailModeLogin = document.getElementById('btn-email-mode-login');
+      const btnEmailModeSignup = document.getElementById('btn-email-mode-signup');
+
+      const inputPhone = document.getElementById('input-phone');
+      const selectCountry = document.getElementById('select-country-code');
+      const btnSubmitIdentifier = document.getElementById('btn-submit-identifier');
+      const btnSubmitIcon = document.getElementById('btn-submit-icon');
+      const btnSubmitText = document.getElementById('btn-submit-text');
+      const statusAlert = document.getElementById('auth-status-alert');
+
+      // Elements - Step Cards
+      const cardStep1 = document.getElementById('auth-card-step1');
+      const cardStep2 = document.getElementById('auth-card-step2');
+      const cardStep3 = document.getElementById('auth-card-step3');
+
+      const sentIcon = document.getElementById('auth-sent-icon');
+      const sentTarget = document.getElementById('auth-sent-target');
+      const btnEditTarget = document.getElementById('btn-edit-target');
+
+      const otpDigitInputs = document.querySelectorAll('.otp-digit-input');
+      const otpStatusAlert = document.getElementById('otp-status-alert');
+
+      const btnVerifyCode = document.getElementById('btn-verify-code');
+      const btnVerifyText = document.getElementById('btn-verify-text');
+
+      const timerDisplay = document.getElementById('timer-display');
+      const timerLabel = document.getElementById('timer-label');
+      const btnResendCode = document.getElementById('btn-resend-code');
+
+      // Elements - Firebase Modal
+      const modalFirebase = document.getElementById('modal-firebase-setup');
+      const btnCloseFbModal = document.getElementById('btn-close-fb-modal');
+      const btnCancelFbConfig = document.getElementById('btn-cancel-fb-config');
+      const btnSaveFbConfig = document.getElementById('btn-save-fb-config');
+      const btnParseFbPaste = document.getElementById('btn-parse-fb-paste');
+      const fbPasteBox = document.getElementById('fb-config-paste-box');
+      const fbSaveAlert = document.getElementById('fb-save-alert');
+
+      const fbInpApiKey = document.getElementById('fb-inp-api-key');
+      const fbInpAuthDomain = document.getElementById('fb-inp-auth-domain');
+      const fbInpProjectId = document.getElementById('fb-inp-project-id');
+      const fbInpAppId = document.getElementById('fb-inp-app-id');
+      const fbInpStorageBucket = document.getElementById('fb-inp-storage-bucket');
+      const fbInpSenderId = document.getElementById('fb-inp-sender-id');
+
+      // ================= Initialize Firebase =================
+      async function checkAndInitFirebase() {
+        try {
+          const res = await fetch('/api/auth/firebase-config');
+          const data = await res.json();
+          if (res.ok && data.is_configured && data.config && data.config.apiKey) {
+            activeFirebaseConfig = data.config;
+            initFirebaseSDK(data.config);
+          } else {
+            setFirebaseStatus(false);
+          }
+        } catch (e) {
+          console.warn('Could not fetch Firebase config:', e);
+          setFirebaseStatus(false);
+        }
+      }
+
+      function initFirebaseSDK(config) {
+        try {
+          if (!window.firebase) {
+            console.error('Firebase SDK not loaded');
+            setFirebaseStatus(false);
+            return;
+          }
+
+          if (firebase.apps.length) {
+            firebase.app().delete();
+          }
+
+          firebase.initializeApp(config);
+          isFirebaseReady = true;
+          setFirebaseStatus(true);
+          console.log('Firebase App initialized successfully:', config.projectId);
+
+          // Check if user clicked a sign-in link from their email
+          checkEmailLinkSignIn();
+        } catch (err) {
+          console.error('Firebase initialization error:', err);
+          setFirebaseStatus(false);
+        }
+      }
+
+      // Automatically handle returning user clicking their email sign-in link
+      async function checkEmailLinkSignIn() {
+        try {
+          if (!window.firebase || !firebase.apps.length) return;
+          const auth = firebase.auth();
+          if (auth.isSignInWithEmailLink(window.location.href)) {
+            let email = window.localStorage.getItem('emailForSignIn');
+            if (!email) {
+              email = window.prompt('Please re-enter your email to confirm sign-in:');
+            }
+            if (!email) return;
+
+            showAlert(statusAlert, 'Verifying your email sign-in link...', 'success');
+            setButtonLoading(btnSubmitIdentifier, btnSubmitText, 'Logging in with email link...');
+
+            const result = await auth.signInWithEmailLink(email, window.location.href);
+            window.localStorage.removeItem('emailForSignIn');
+            // Clean up the URL query parameters
+            window.history.replaceState({}, document.title, window.location.pathname);
+            const idToken = await result.user.getIdToken();
+            await completeBackendSession(idToken, email);
+          }
+        } catch (err) {
+          console.error('Sign in with email link failed:', err);
+          let errDetail = err.message || '';
+          if (err.code === 'auth/invalid-action-code') {
+            errDetail = 'The email link has expired or has already been used. Please request a new link.';
+          }
+          showAlert(statusAlert, 'Email Link Login Failed: ' + errDetail, 'error');
+        } finally {
+          resetButtonLoading(btnSubmitIdentifier, btnSubmitText, 'Send Sign-In Link to Email');
+        }
+      }
+
+      function setFirebaseStatus(connected) {
+        isFirebaseReady = connected;
+        if (connected) {
+          fbStatusDot.className = 'w-2 h-2 rounded-full bg-brand-green animate-pulse';
+          fbStatusText.textContent = 'Firebase: Connected';
+          if (firebaseConfigBanner) firebaseConfigBanner.classList.add('hidden');
+        } else {
+          fbStatusDot.className = 'w-2 h-2 rounded-full bg-amber-400';
+          fbStatusText.textContent = 'Firebase: Setup Needed';
+          if (firebaseConfigBanner) firebaseConfigBanner.classList.remove('hidden');
+        }
+      }
+
+      checkAndInitFirebase();
+
+      // ================= Channel Switching =================
+      tabEmail.addEventListener('click', () => {
+        activeChannel = 'email';
+        tabEmail.className = 'flex-1 py-2 px-3 rounded-lg font-bold transition-all flex items-center justify-center gap-2 bg-brand-blue text-white shadow-md cursor-pointer';
+        tabPhone.className = 'flex-1 py-2 px-3 rounded-lg font-medium text-gray-400 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer';
+        formEmail.classList.remove('hidden');
+        formPhone.classList.add('hidden');
+        updateSubmitButtonUI();
+        hideAlert(statusAlert);
+        inputEmail.focus();
+      });
+
+      tabPhone.addEventListener('click', () => {
+        activeChannel = 'phone';
+        tabPhone.className = 'flex-1 py-2 px-3 rounded-lg font-bold transition-all flex items-center justify-center gap-2 bg-brand-blue text-white shadow-md cursor-pointer';
+        tabEmail.className = 'flex-1 py-2 px-3 rounded-lg font-medium text-gray-400 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer';
+        formPhone.classList.remove('hidden');
+        formEmail.classList.add('hidden');
+        updateSubmitButtonUI();
+        hideAlert(statusAlert);
+        inputPhone.focus();
+      });
+
+      // ================= Email Mode Toggle (Magic Link vs Password vs Register) =================
+      if (btnEmailModeMagic) {
+        btnEmailModeMagic.addEventListener('click', () => {
+          emailMode = 'magic';
+          btnEmailModeMagic.className = 'flex-1 py-1.5 rounded-lg font-bold text-white bg-card-inner border border-brand-blue/30 shadow-sm transition-all cursor-pointer';
+          btnEmailModeLogin.className = 'flex-1 py-1.5 rounded-lg font-medium text-gray-400 hover:text-white transition-all cursor-pointer';
+          btnEmailModeSignup.className = 'flex-1 py-1.5 rounded-lg font-medium text-gray-400 hover:text-white transition-all cursor-pointer';
+          if (boxPassword) boxPassword.classList.add('hidden');
+          if (hintMagicLink) hintMagicLink.classList.remove('hidden');
+          updateSubmitButtonUI();
+          hideAlert(statusAlert);
+        });
+      }
+
+      btnEmailModeLogin.addEventListener('click', () => {
+        emailMode = 'login';
+        btnEmailModeLogin.className = 'flex-1 py-1.5 rounded-lg font-bold text-white bg-card-inner border border-brand-blue/30 shadow-sm transition-all cursor-pointer';
+        if (btnEmailModeMagic) btnEmailModeMagic.className = 'flex-1 py-1.5 rounded-lg font-medium text-gray-400 hover:text-white transition-all cursor-pointer';
+        btnEmailModeSignup.className = 'flex-1 py-1.5 rounded-lg font-medium text-gray-400 hover:text-white transition-all cursor-pointer';
+        if (boxPassword) boxPassword.classList.remove('hidden');
+        if (hintMagicLink) hintMagicLink.classList.add('hidden');
+        updateSubmitButtonUI();
+        hideAlert(statusAlert);
+      });
+
+      btnEmailModeSignup.addEventListener('click', () => {
+        emailMode = 'signup';
+        btnEmailModeSignup.className = 'flex-1 py-1.5 rounded-lg font-bold text-white bg-card-inner border border-brand-blue/30 shadow-sm transition-all cursor-pointer';
+        if (btnEmailModeMagic) btnEmailModeMagic.className = 'flex-1 py-1.5 rounded-lg font-medium text-gray-400 hover:text-white transition-all cursor-pointer';
+        btnEmailModeLogin.className = 'flex-1 py-1.5 rounded-lg font-medium text-gray-400 hover:text-white transition-all cursor-pointer';
+        if (boxPassword) boxPassword.classList.remove('hidden');
+        if (hintMagicLink) hintMagicLink.classList.add('hidden');
+        updateSubmitButtonUI();
+        hideAlert(statusAlert);
+      });
+
+      function updateSubmitButtonUI() {
+        if (activeChannel === 'email') {
+          if (emailMode === 'magic') {
+            btnSubmitIcon.textContent = 'forward_to_inbox';
+            btnSubmitText.textContent = 'Send Sign-In Link to Email';
+          } else if (emailMode === 'login') {
+            btnSubmitIcon.textContent = 'login';
+            btnSubmitText.textContent = 'Sign In with Password';
+          } else {
+            btnSubmitIcon.textContent = 'person_add';
+            btnSubmitText.textContent = 'Create Account & Claim \u20B9100,000';
+          }
+        } else {
+          btnSubmitIcon.textContent = 'sms';
+          btnSubmitText.textContent = 'Send Mobile SMS OTP';
+        }
+      }
+
+      // Toggle Password Visibility
+      if (btnTogglePassword && inputPassword) {
+        btnTogglePassword.addEventListener('click', () => {
+          const isPwd = inputPassword.type === 'password';
+          inputPassword.type = isPwd ? 'text' : 'password';
+          iconTogglePassword.textContent = isPwd ? 'visibility_off' : 'visibility';
+        });
+      }
+
+      // Forgot Password Trigger
+      if (btnForgotPassword) {
+        btnForgotPassword.addEventListener('click', async () => {
+          const emailVal = (inputEmail.value || '').trim();
+          if (!emailVal || !emailVal.includes('@')) {
+            showAlert(statusAlert, 'Please enter your email address above to reset password.', 'error');
+            inputEmail.focus();
+            return;
+          }
+
+          if (!isFirebaseReady) {
+            showAlert(statusAlert, 'Firebase is not yet configured. Please click Firebase Setup in the header.', 'error');
+            openFirebaseModal();
+            return;
+          }
+
+          try {
+            await firebase.auth().sendPasswordResetEmail(emailVal);
+            showAlert(statusAlert, `Password reset email sent to ${emailVal}. Please check your inbox.`, 'success');
+          } catch (err) {
+            showAlert(statusAlert, `Reset failed: ${err.message}`, 'error');
+          }
+        });
+      }
+
+      // Quick-fill Domain Chips
+      document.querySelectorAll('.chip-domain').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const dom = chip.getAttribute('data-domain');
+          let val = (inputEmail.value || '').trim();
+          if (!val) val = 'trader';
+          if (val.includes('@')) {
+            val = val.split('@')[0] + dom;
+          } else {
+            val = val + dom;
+          }
+          inputEmail.value = val;
+          inputEmail.focus();
+        });
+      });
+
+      // ================= Primary Action: Submit (Email Auth or Phone SMS) =================
+      async function handlePrimarySubmit() {
+        hideAlert(statusAlert);
+
+        if (activeChannel === 'email') {
+          await handleEmailAuth();
+        } else {
+          await handlePhoneAuth();
+        }
+      }
+
+      // 1. Live Firebase Email Authentication (Passwordless Link & Password)
+      async function handleEmailAuth() {
+        const email = (inputEmail.value || '').trim();
+
+        if (!email || !email.includes('@')) {
+          showAlert(statusAlert, 'Please enter a valid email address.', 'error');
+          inputEmail.focus();
+          return;
+        }
+
+        if (!isFirebaseReady) {
+          showAlert(statusAlert, 'Firebase Auth is not yet configured. Connect your Firebase credentials in the top right.', 'error');
+          openFirebaseModal();
+          return;
+        }
+
+        // Mode A: Passwordless Email Sign-In Link (per https://firebase.google.com/docs/auth/web/email-link-auth)
+        if (emailMode === 'magic') {
+          setButtonLoading(btnSubmitIdentifier, btnSubmitText, 'Dispatching Sign-In Link...');
+          try {
+            const actionCodeSettings = {
+              url: window.location.origin + '/auth',
+              handleCodeInApp: true
+            };
+            await firebase.auth().sendSignInLinkToEmail(email, actionCodeSettings);
+            window.localStorage.setItem('emailForSignIn', email);
+            showAlert(statusAlert, `Passwordless sign-in link dispatched to ${email}! Open your email and click the link to log in directly.`, 'success');
+          } catch (err) {
+            console.error('Send sign-in link error:', err);
+            let msg = err.message || '';
+            if (err.code === 'auth/operation-not-allowed') {
+              msg = 'Email Link is not enabled in Firebase Console. Go to Authentication > Sign-in method > Email/Password and check "Email link (passwordless sign-in)".';
+            } else if (err.code === 'auth/unauthorized-domain') {
+              msg = 'Domain ' + window.location.hostname + ' is not authorized. In Firebase Console > Authentication > Settings > Authorized domains, add ' + window.location.hostname + ' (or use localhost:8000).';
+            }
+            showAlert(statusAlert, msg, 'error');
+          } finally {
+            resetButtonLoading(btnSubmitIdentifier, btnSubmitText, 'Send Sign-In Link to Email');
+          }
+          return;
+        }
+
+        // Mode B: Standard Password Sign In / Registration
+        const password = (inputPassword.value || '').trim();
+        if (!password || password.length < 6) {
+          showAlert(statusAlert, 'Password must be at least 6 characters.', 'error');
+          inputPassword.focus();
+          return;
+        }
+
+        setButtonLoading(btnSubmitIdentifier, btnSubmitText, emailMode === 'login' ? 'Authenticating...' : 'Creating Account...');
+
+        try {
+          let userCredential = null;
+          if (emailMode === 'login') {
+            userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+          } else {
+            userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+          }
+
+          const idToken = await userCredential.user.getIdToken();
+          await completeBackendSession(idToken, email);
+        } catch (err) {
+          console.error('Firebase Email error:', err);
+          let friendlyMsg = err.message;
+          if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+            friendlyMsg = 'Invalid email or password. If you are new, click "Register" or switch to "Magic Link".';
+          } else if (err.code === 'auth/email-already-in-use') {
+            friendlyMsg = 'An account already exists with this email. Click "Password" sign in or use "Magic Link".';
+          }
+          showAlert(statusAlert, friendlyMsg, 'error');
+        } finally {
+          resetButtonLoading(btnSubmitIdentifier, btnSubmitText, emailMode === 'login' ? 'Sign In with Password' : 'Create Account & Claim \u20B9100,000');
+        }
+      }
+
+      // 2. Live Firebase Mobile Phone Authentication (SMS OTP)
+      async function handlePhoneAuth() {
+        let phoneNum = (inputPhone.value || '').trim();
+        if (!phoneNum) {
+          showAlert(statusAlert, 'Please enter a valid phone number.', 'error');
+          inputPhone.focus();
+          return;
+        }
+
+        const dial = selectCountry.value;
+        const fullPhone = phoneNum.startsWith('+') ? phoneNum : (dial + phoneNum.replace(/^0+/, ''));
+        currentIdentifier = fullPhone;
+
+        if (!isFirebaseReady) {
+          showAlert(statusAlert, 'Firebase Auth is not yet initialized. Please check your credentials or click Firebase Settings.', 'error');
+          openFirebaseModal();
+          return;
+        }
+
+        setButtonLoading(btnSubmitIdentifier, btnSubmitText, 'Dispatching SMS OTP...');
+
+        try {
+          // Initialize or reset reCAPTCHA
+          if (!window.recaptchaVerifier) {
+            window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+              size: 'invisible',
+              callback: () => {
+                console.log('reCAPTCHA verified');
+              },
+              'expired-callback': () => {
+                console.warn('reCAPTCHA expired');
+              }
+            });
+          }
+
+          const confirmationResult = await firebase.auth().signInWithPhoneNumber(fullPhone, window.recaptchaVerifier);
+          window.confirmationResult = confirmationResult;
+
+          // Transition to Step 2
+          cardStep1.classList.add('hidden');
+          cardStep2.classList.remove('hidden');
+
+          sentTarget.textContent = fullPhone;
+          sentIcon.textContent = 'smartphone';
+
+          otpDigitInputs.forEach(i => { i.value = ''; });
+
+          startCountdownTimer(60);
+
+          setTimeout(() => {
+            if (otpDigitInputs[0]) otpDigitInputs[0].focus();
+          }, 100);
+
+        } catch (err) {
+          console.error('Firebase Phone Auth error:', err);
+          if (window.recaptchaVerifier) {
+            try { window.recaptchaVerifier.clear(); window.recaptchaVerifier = null; } catch(e) {}
+          }
+          let errorMsg = err.message || '';
+          if (err.code === 'auth/operation-not-allowed' || errorMsg.includes('SMS unable to be sent until this region enabled') || errorMsg.includes('operation-not-allowed')) {
+            errorMsg = 'SMS Dispatch Blocked: Firebase Phone Auth or the India (+91) region is not yet enabled in your Firebase project. In Firebase Console: 1) Go to Authentication > Sign-in method > Enable "Phone". 2) Go to Authentication > Settings > SMS region policy > Select/Allow India (+91).';
+          } else if (err.code === 'auth/unauthorized-domain') {
+            errorMsg = 'Unauthorized Domain: Access via http://localhost:8000/auth (or add ' + window.location.hostname + ' to Firebase Console > Authentication > Settings > Authorized domains).';
+          } else if (err.code === 'auth/invalid-phone-number') {
+            errorMsg = 'Invalid phone number format. Please ensure you enter a valid mobile number with country code.';
+          } else if (err.code === 'auth/quota-exceeded') {
+            errorMsg = 'Daily SMS quota reached in Firebase. In Firebase Console, you can register your phone under "Phone numbers for testing" for instant verification.';
+          } else if (err.code === 'auth/too-many-requests') {
+            errorMsg = 'Too many requests from this device. Please wait a moment before trying again.';
+          } else {
+            errorMsg = 'SMS dispatch failed: ' + errorMsg;
+          }
+          showAlert(statusAlert, errorMsg, 'error');
+        } finally {
+          resetButtonLoading(btnSubmitIdentifier, btnSubmitText, 'Send Mobile SMS OTP');
+        }
+      }
+
+      btnSubmitIdentifier.addEventListener('click', handlePrimarySubmit);
+
+      // ================= Google Sign-In (Firebase) =================
+      const btnGoogleSignin = document.getElementById('btn-google-signin');
+      const btnGoogleText = document.getElementById('btn-google-text');
+      async function handleGoogleSignIn() {
+        hideAlert(statusAlert);
+        if (!isFirebaseReady) {
+          showAlert(statusAlert, 'Firebase Auth is not yet configured. Connect your Firebase credentials in the top right.', 'error');
+          openFirebaseModal();
+          return;
+        }
+        if (btnGoogleSignin) { btnGoogleSignin.disabled = true; }
+        if (btnGoogleText) btnGoogleText.textContent = 'Connecting to Google...';
+        try {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          provider.setCustomParameters({ prompt: 'select_account' });
+          const result = await firebase.auth().signInWithPopup(provider);
+          const idToken = await result.user.getIdToken();
+          await completeBackendSession(idToken, (result.user && result.user.email) || 'google');
+        } catch (err) {
+          console.error('Google sign-in error:', err);
+          let msg = err.message || 'Google sign-in failed.';
+          if (err.code === 'auth/popup-closed-by-user') msg = 'Google popup closed before completing sign-in.';
+          else if (err.code === 'auth/unauthorized-domain') msg = 'Unauthorized domain: add ' + window.location.hostname + ' in Firebase Console > Authentication > Settings > Authorized domains.';
+          else if (err.code === 'auth/operation-not-allowed') msg = 'Google provider not enabled in Firebase Console > Authentication > Sign-in method.';
+          showAlert(statusAlert, msg, 'error');
+        } finally {
+          if (btnGoogleSignin) { btnGoogleSignin.disabled = false; }
+          if (btnGoogleText) btnGoogleText.textContent = 'Continue with Google';
+        }
+      }
+      if (btnGoogleSignin) btnGoogleSignin.addEventListener('click', handleGoogleSignIn);
+      inputEmail.addEventListener('keydown', (e) => { if (e.key === 'Enter') handlePrimarySubmit(); });
+      inputPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') handlePrimarySubmit(); });
+      inputPhone.addEventListener('keydown', (e) => { if (e.key === 'Enter') handlePrimarySubmit(); });
+
+      // Change Target Back to Step 1
+      btnEditTarget.addEventListener('click', () => {
+        clearInterval(timerInterval);
+        cardStep2.classList.add('hidden');
+        cardStep1.classList.remove('hidden');
+        hideAlert(otpStatusAlert);
+        if (activeChannel === 'email') inputEmail.focus();
+        else inputPhone.focus();
+      });
+
+      // OTP Digit Box Navigation & Paste Support
+      otpDigitInputs.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+          const val = e.target.value.replace(/[^0-9]/g, '');
+          e.target.value = val ? val.slice(-1) : '';
+
+          if (e.target.value && index < otpDigitInputs.length - 1) {
+            otpDigitInputs[index + 1].focus();
+          }
+
+          checkAndAutoSubmit();
+        });
+
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Backspace' && !input.value && index > 0) {
+            otpDigitInputs[index - 1].focus();
+          } else if (e.key === 'ArrowLeft' && index > 0) {
+            otpDigitInputs[index - 1].focus();
+          } else if (e.key === 'ArrowRight' && index < otpDigitInputs.length - 1) {
+            otpDigitInputs[index + 1].focus();
+          } else if (e.key === 'Enter') {
+            verifyOTP();
+          }
+        });
+
+        input.addEventListener('paste', (e) => {
+          e.preventDefault();
+          const pasteData = (e.clipboardData || window.clipboardData).getData('text');
+          const cleanDigits = pasteData.replace(/[^0-9]/g, '').slice(0, 6);
+          if (cleanDigits.length > 0) {
+            cleanDigits.split('').forEach((digit, i) => {
+              if (otpDigitInputs[i]) otpDigitInputs[i].value = digit;
+            });
+            const focusIdx = Math.min(cleanDigits.length, 5);
+            if (otpDigitInputs[focusIdx]) otpDigitInputs[focusIdx].focus();
+            if (cleanDigits.length === 6) {
+              verifyOTP();
+            }
+          }
+        });
+      });
+
+      function getEnteredOTP() {
+        let code = '';
+        otpDigitInputs.forEach(i => { code += (i.value || ''); });
+        return code;
+      }
+
+      function checkAndAutoSubmit() {
+        const code = getEnteredOTP();
+        if (code.length === 6) {
+          verifyOTP();
+        }
+      }
+
+      // ================= Step 2: Verify OTP =================
+      async function verifyOTP() {
+        hideAlert(otpStatusAlert);
+        const otpCode = getEnteredOTP();
+
+        if (otpCode.length !== 6) {
+          showAlert(otpStatusAlert, 'Please enter all 6 digits of the verification code.', 'error');
+          return;
+        }
+
+        btnVerifyCode.disabled = true;
+        btnVerifyText.textContent = 'Verifying with Firebase...';
+        btnVerifyCode.classList.add('opacity-75', 'cursor-not-allowed');
+
+        try {
+          // 1. Check if we have an active Firebase phone confirmation result
+          if (window.confirmationResult) {
+            const userCredential = await window.confirmationResult.confirm(otpCode);
+            const idToken = await userCredential.user.getIdToken();
+            await completeBackendSession(idToken, currentIdentifier);
+            return;
+          }
+
+          // 2. Fallback to local server OTP verification
+          const res = await fetch('/api/auth/verify-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ identifier: currentIdentifier, otp: otpCode })
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+            showAlert(otpStatusAlert, data.detail || 'Invalid or expired code.', 'error');
+            otpDigitInputs.forEach(i => i.classList.add('border-brand-red'));
+            setTimeout(() => { otpDigitInputs.forEach(i => i.classList.remove('border-brand-red')); }, 1500);
+            return;
+          }
+
+          handleSuccessfulAuth(data);
+
+        } catch (err) {
+          showAlert(otpStatusAlert, 'Verification error: ' + err.message, 'error');
+        } finally {
+          btnVerifyCode.disabled = false;
+          btnVerifyText.textContent = 'Verify & Launch Terminal';
+          btnVerifyCode.classList.remove('opacity-75', 'cursor-not-allowed');
+        }
+      }
+
+      btnVerifyCode.addEventListener('click', verifyOTP);
+
+      // ================= Backend Firebase Session Bridge =================
+      async function completeBackendSession(idToken, identifier) {
+        try {
+          const res = await fetch('/api/auth/firebase-login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_token: idToken })
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.detail || 'Failed to exchange Firebase token for QuantVeda session.');
+          }
+
+          handleSuccessfulAuth(data);
+        } catch (err) {
+          console.error('Session bridge error:', err);
+          showAlert(activeChannel === 'email' ? statusAlert : otpStatusAlert, err.message, 'error');
+        }
+      }
+
+      function handleSuccessfulAuth(data) {
+        clearInterval(timerInterval);
+        const token = data.token || data.access_token;
+        const user = data.user;
+
+        // Store tokens
+        if (token) {
+          localStorage.setItem('quantveda_token', token);
+          localStorage.setItem('quantveda_auth_token', token);
+        }
+        if (user) localStorage.setItem('quantveda_user', JSON.stringify(user));
+
+        // Transition to Step 3
+        cardStep1.classList.add('hidden');
+        cardStep2.classList.add('hidden');
+        cardStep3.classList.remove('hidden');
+
+        document.getElementById('success-user-id').textContent = user.email || user.phone || user.name || currentIdentifier;
+        if (user.cash_balance !== undefined) {
+          document.getElementById('success-wallet-balance').innerHTML = '&#8377;' + Number(user.cash_balance).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+        }
+
+        if (data.is_new_user) {
+          document.getElementById('success-welcome-msg').textContent = 'Welcome to QuantVeda! Your \u20B9100,000 paper wallet has been seeded.';
+        } else {
+          document.getElementById('success-welcome-msg').textContent = 'Welcome back, ' + (user.name || 'Trader') + '! Session authenticated.';
+        }
+
+        // Progress bar countdown animation to terminal
+        const progressBar = document.getElementById('redirect-progress');
+        const secondsSpan = document.getElementById('redirect-seconds');
+        let count = 2;
+
+        setTimeout(() => { progressBar.style.width = '100%'; }, 50);
+
+        const redirectTimer = setInterval(() => {
+          count--;
+          if (secondsSpan) secondsSpan.textContent = count;
+          if (count <= 0) {
+            clearInterval(redirectTimer);
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetUrl = urlParams.get('redirect') || '/terminal';
+            window.location.href = targetUrl;
+          }
+        }, 1000);
+      }
+
+      // ================= Countdown Timer =================
+      function startCountdownTimer(seconds) {
+        clearInterval(timerInterval);
+        countdownRemaining = seconds;
+        updateTimerDisplay();
+
+        btnResendCode.classList.add('hidden');
+        timerLabel.classList.remove('hidden');
+        timerDisplay.classList.remove('hidden');
+
+        timerInterval = setInterval(() => {
+          countdownRemaining--;
+          updateTimerDisplay();
+
+          if (countdownRemaining <= 0) {
+            clearInterval(timerInterval);
+            timerLabel.classList.add('hidden');
+            timerDisplay.classList.add('hidden');
+            btnResendCode.classList.remove('hidden');
+          }
+        }, 1000);
+      }
+
+      function updateTimerDisplay() {
+        const m = Math.floor(countdownRemaining / 60);
+        const s = countdownRemaining % 60;
+        timerDisplay.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+      }
+
+      // Resend OTP Action
+      btnResendCode.addEventListener('click', async () => {
+        btnResendCode.textContent = 'Resending...';
+        btnResendCode.classList.add('opacity-50', 'pointer-events-none');
+        try {
+          if (activeChannel === 'phone' && isFirebaseReady) {
+            const confirmationResult = await firebase.auth().signInWithPhoneNumber(currentIdentifier, window.recaptchaVerifier);
+            window.confirmationResult = confirmationResult;
+            showAlert(otpStatusAlert, 'A new SMS OTP has been sent via Firebase!', 'success');
+            startCountdownTimer(60);
+          } else {
+            const res = await fetch('/api/auth/send-otp', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ identifier: currentIdentifier, channel: activeChannel })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              showAlert(otpStatusAlert, data.detail || 'Failed to resend code.', 'error');
+              return;
+            }
+            showAlert(otpStatusAlert, 'A new verification code has been dispatched!', 'success');
+            startCountdownTimer(60);
+          }
+        } catch (e) {
+          showAlert(otpStatusAlert, 'Resend failed: ' + e.message, 'error');
+        } finally {
+          btnResendCode.textContent = 'Resend Code Now';
+          btnResendCode.classList.remove('opacity-50', 'pointer-events-none');
+        }
+      });
+
+      // ================= Firebase Setup Modal Controller =================
+      function openFirebaseModal() {
+        modalFirebase.classList.remove('hidden');
+        if (activeFirebaseConfig) {
+          fbInpApiKey.value = activeFirebaseConfig.apiKey || '';
+          fbInpAuthDomain.value = activeFirebaseConfig.authDomain || '';
+          fbInpProjectId.value = activeFirebaseConfig.projectId || '';
+          fbInpAppId.value = activeFirebaseConfig.appId || '';
+          fbInpStorageBucket.value = activeFirebaseConfig.storageBucket || '';
+          fbInpSenderId.value = activeFirebaseConfig.messagingSenderId || '';
+        }
+      }
+
+      function closeFirebaseModal() {
+        modalFirebase.classList.add('hidden');
+        hideAlert(fbSaveAlert);
+      }
+
+      if (btnFirebaseSettings) btnFirebaseSettings.addEventListener('click', openFirebaseModal);
+      if (btnBannerOpenFb) btnBannerOpenFb.addEventListener('click', openFirebaseModal);
+      if (btnCloseFbModal) btnCloseFbModal.addEventListener('click', closeFirebaseModal);
+      if (btnCancelFbConfig) btnCancelFbConfig.addEventListener('click', closeFirebaseModal);
+
+      // Auto-parse pasted config
+      if (btnParseFbPaste) {
+        btnParseFbPaste.addEventListener('click', () => {
+          const raw = (fbPasteBox.value || '').trim();
+          if (!raw) return;
+
+          const extract = (key) => {
+            const m = raw.match(new RegExp(key + '\\s*:\\s*["\']([^"\']+)["\']', 'i'));
+            return m ? m[1] : '';
+          };
+
+          const k = extract('apiKey');
+          const ad = extract('authDomain');
+          const p = extract('projectId');
+          const a = extract('appId');
+          const sb = extract('storageBucket');
+          const s = extract('messagingSenderId');
+
+          if (k) fbInpApiKey.value = k;
+          if (ad) fbInpAuthDomain.value = ad;
+          if (p) fbInpProjectId.value = p;
+          if (a) fbInpAppId.value = a;
+          if (sb) fbInpStorageBucket.value = sb;
+          if (s) fbInpSenderId.value = s;
+
+          showAlert(fbSaveAlert, 'Parsed configuration values. Click "Save & Connect" to activate.', 'success');
+        });
+      }
+
+      // Save Firebase Config
+      if (btnSaveFbConfig) {
+        btnSaveFbConfig.addEventListener('click', async () => {
+          const payload = {
+            api_key: fbInpApiKey.value.trim(),
+            auth_domain: fbInpAuthDomain.value.trim(),
+            project_id: fbInpProjectId.value.trim(),
+            app_id: fbInpAppId.value.trim(),
+            storage_bucket: fbInpStorageBucket.value.trim(),
+            messaging_sender_id: fbInpSenderId.value.trim()
+          };
+
+          if (!payload.api_key || !payload.project_id) {
+            showAlert(fbSaveAlert, 'API Key and Project ID are required.', 'error');
+            return;
+          }
+
+          btnSaveFbConfig.disabled = true;
+          btnSaveFbConfig.textContent = 'Saving...';
+
+          try {
+            const res = await fetch('/api/auth/save-firebase-config', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+              throw new Error(data.detail || 'Failed to save configuration');
+            }
+
+            activeFirebaseConfig = {
+              apiKey: payload.api_key,
+              authDomain: payload.auth_domain,
+              projectId: payload.project_id,
+              appId: payload.app_id,
+              storageBucket: payload.storage_bucket,
+              messagingSenderId: payload.messaging_sender_id
+            };
+
+            initFirebaseSDK(activeFirebaseConfig);
+            showAlert(fbSaveAlert, 'Firebase connected successfully! You can now authenticate with Email or Phone OTP.', 'success');
+
+            setTimeout(() => {
+              closeFirebaseModal();
+            }, 1200);
+
+          } catch (e) {
+            showAlert(fbSaveAlert, e.message, 'error');
+          } finally {
+            btnSaveFbConfig.disabled = false;
+            btnSaveFbConfig.textContent = 'Save & Connect Firebase';
+          }
+        });
+      }
+
+      // Helpers
+      function setButtonLoading(btn, textSpan, msg) {
+        btn.disabled = true;
+        textSpan.textContent = msg;
+        btn.classList.add('opacity-75', 'cursor-not-allowed');
+      }
+
+      function resetButtonLoading(btn, textSpan, msg) {
+        btn.disabled = false;
+        textSpan.textContent = msg;
+        btn.classList.remove('opacity-75', 'cursor-not-allowed');
+      }
+
+      function showAlert(el, msg, type) {
+        if (!el) return;
+        el.textContent = msg;
+        el.classList.remove('hidden', 'bg-red-950/40', 'border-red-500/50', 'text-red-300', 'bg-emerald-950/40', 'border-emerald-500/50', 'text-emerald-300');
+        if (type === 'error') {
+          el.classList.add('bg-red-950/40', 'border-red-500/50', 'text-red-300');
+        } else {
+          el.classList.add('bg-emerald-950/40', 'border-emerald-500/50', 'text-emerald-300');
+        }
+      }
+
+      function hideAlert(el) {
+        if (!el) return;
+        el.classList.add('hidden');
+        el.textContent = '';
+      }
+
+    })();
+  </script>
+
+</body>
+</html>
