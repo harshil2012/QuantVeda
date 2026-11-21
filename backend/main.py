@@ -254,9 +254,9 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="QuantVeda AI Backend",
+    title="QuantVeda Backend",
     description="FastAPI backend serving real-time market quotes, search autocomplete, market status, and AI sentiment analysis.",
-    version="2.0.0",
+    version="1.0.0",
     lifespan=lifespan
 )
 
@@ -1916,7 +1916,7 @@ async def serve_spa():
     index_file = os.path.join(frontend_path, "index.html")
     if os.path.exists(index_file):
         return FileResponse(index_file)
-    return {"status": "running", "project": "QuantVeda AI", "version": "2.0.0"}
+    return {"status": "running", "project": "QuantVeda", "version": "1.0.0"}
 
 @app.get("/{filename:path}")
 async def serve_frontend_files(filename: str):

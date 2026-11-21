@@ -154,7 +154,7 @@ export default function AuthPage({ onAuth }: AuthPageProps) {
               <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-mono font-medium mb-1">
                   <span className="w-2 h-2 rounded-full bg-blue-400 animate-ping" />
-                  <span>QUANTVEDA SECURE GATEWAY v2.0</span>
+                  <span>QUANTVEDA SECURE GATEWAY</span>
                 </div>
                 <div className="text-xs font-mono text-cyan-300/80 tracking-wider">INSTITUTIONAL AI TRADING ENGINE</div>
               </div>

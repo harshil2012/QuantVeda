@@ -22,7 +22,7 @@ V1 Dashboard (#view-dashboard, default)
 - AI Signal card: badge #ai-signal-badge (BUY/SELL/HOLD), #ai-conviction-val, #ai-target-price, #ai-stop-loss, horizon 14D. Data: quote prediction (canonical signal).
 - Sentiment panel: #bullish-pct-label, #bearish-pct-label, bars #bullish-bar/#bearish-bar, bullets #sentiment-bullet-list. Data: GET /api/analyze/{sym}.
 - Correlated table: #dash-correlated-table-body columns Name / Correlation / Price / 24h Chg / AI Bias, refresh #btn-view-matrix.
-V2 Charts (#view-charts, TradingView clone)
+Charts View (#view-charts, TradingView clone)
 - Toolbar: symbol picker (#chart-symbol-dropdown-btn, #chart-current-symbol), interval menu (#chart-interval-dropdown-btn/menu, 1m/5m/15m/1H/4H/1D/1W/1M → currentChartInterval), chart-type menu (#chart-type-dropdown-btn/menu: Candles/Hollow/Line/Area/Bars/Heikin Ashi), applied-indicators bar (#applied-indicators-list), Indicators #btn-chart-indicators, Alert #btn-chart-alert (stub), Replay #btn-chart-replay (stub), Settings #btn-chart-settings, Fullscreen #btn-chart-fullscreen.
 - Left rail #drawing-tools: select/trendline/hline/vline/rectangle/text/magnet/stay/zoom/measure/clear (mostly visual stubs — confirm scope in redesign).
 - Canvas #tv-chart-container (Lightweight Charts) + legend (#tv-legend-name/tf/exch, quick SELL #tv-sell-price / BUY #tv-buy-price → opens order modal), OHLC row (#ohlc-o/h/l/c/chg), active indicator values (#tv-active-indicators-legend), paper-trading bar (#quantveda-paper-trading-bar, balance #chart-paper-wallet-balance), crosshair lines/tooltips, loader #chart-loading-spinner. Data: GET /api/candles/{sym}?interval&range, GET /api/candles/{sym}/max, WS  /ws/price/{sym} + 3s polling fallback. Persist: quantveda_chart_settings.
